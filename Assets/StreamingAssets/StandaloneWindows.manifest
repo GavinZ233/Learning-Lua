@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 4101392101
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: model.cu
+      Dependencies: {}
+    Info_1:
+      Name: model.ca
+      Dependencies: {}
