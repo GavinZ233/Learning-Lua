@@ -55,13 +55,63 @@ all right
 |和导出文件夹同名|ab包的主包,记录依赖关系|
 
 #### 1.2.4 UnityLearn对于AB包的介绍
-
-
+（暂时空着，回头看看文章对于资源引用的介绍）    
+https://learn.unity.com/tutorial/assets-resources-and-assetbundles#5c7f8528edbc2a002053b5a6
 
 
 ### 1.3 使用AB包资源
+#### 1.3.1  同步加载AB包
+
+1. 类型加载     
+
+        //加载AB包,ab包不能重复加载
+        AssetBundle bundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + "model");
+        //加载ab包中的资源
+        GameObject cube = bundle.LoadAsset("Cube", typeof(GameObject)) as GameObject;
+        //实例化
+        Instantiate(cube);
 
 
+2. 泛型加载     
+         
+        //泛型加载
+        GameObject cap = bundle.LoadAsset<GameObject>("Capsule");
+        //实例化
+        Instantiate(cap, Vector3.one, Quaternion.identity);
+
+
+
+#### 1.3.2 异步加载AB包
+        IEnumerator LoadABRes(string abName, string resName)
+        {
+          AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(Application.streamingAssetsPath + "/" + abName);
+          yield return abcr;
+          AssetBundleRequest abq = abcr.assetBundle.LoadAssetAsync(resName, typeof(Sprite));
+          yield return abq;
+
+          img.sprite = abq.asset as Sprite;
+          img.rectTransform.localScale = Vector3.one * 5;
+        }
+
+>注意 ： 此处的 `AssetBundleCreateRequest` 和 `AssetBundleRequest` 类都是继承自 `AsyncOperation`，属于异步操作协同程序。    
+        AssetBundleCreateRequest是创建请求，创建成功后，返回AssetBundleRequest加载请求，可以从AssetBundleRequest中得到加载成功的AB包
+
+
+#### 1.3.3 卸载AB包
+
+            //卸载所有AB包，入参为是否卸载已经加载的AB包资源
+            AssetBundle.UnloadAllAssetBundles(false);
+
+            //单个ab包卸载，入参为是否卸载已经加载的AB包资源
+            bundle.Unload(true);
+>实用场景中，大部分情况不会入参true
+
+
+#### 1.3.4 依赖包
+
+如果某模型的材质与模型分别打包，只加载模型的AB包，实例化出来的模型是无材质的,需要将材质所在的AB包也一并加载。
+
+包与包之间的依赖被记录在主包中，但不会记录资源对包的依赖，只会记录包内部所有资源对外部哪些包有依赖。
 
 
 

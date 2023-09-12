@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1461068366
+CRC: 3523924924
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 50d41b6e83603e8a010ce689f145c3fd
+    Hash: a0422216600e5f74d3a55e53ce718b0c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 9b3a9faa90f30005ac3ba42e4521fc02
+    Hash: 019edb7ad1c3ad46a6b73914d2d10ab4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,8 +25,12 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Resources/Cube.prefab
 - Assets/Resources/Cube (1).prefab
-Dependencies: []
+- Assets/Resources/Capsule.prefab
+Dependencies:
+- E:/GitHubRepository/Learning-Lua/AssetBundles/StandaloneWindows/image
