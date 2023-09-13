@@ -1,7 +1,7 @@
 # Learning-Lua
 lua课程学习笔记
 
-all right 
+
 
 ## 整体结构
 
@@ -48,7 +48,7 @@ all right
 |Dry Run Build|运行时构建|
 
 #### 1.2.3 ab包文件
-|文件|作用|
+|文件名|作用|
 |--|--|
 |包名.分组名|ab包本体|
 |manifest|ab包的关联信息，资源信息，版本信息等|
@@ -111,8 +111,21 @@ https://learn.unity.com/tutorial/assets-resources-and-assetbundles#5c7f8528edbc2
 
 如果某模型的材质与模型分别打包，只加载模型的AB包，实例化出来的模型是无材质的,需要将材质所在的AB包也一并加载。
 
-包与包之间的依赖被记录在主包中，但不会记录资源对包的依赖，只会记录包内部所有资源对外部哪些包有依赖。
+包与包之间的依赖被记录在主包中，但不会记录资源对包的依赖，只会记录包内部所有资源对外部哪些包有依赖。    
+举个栗子：model包中有模型（坦克和炮弹），tanktt包中有坦克车身的贴图，tracktt包中有履带贴图，shelltt包中有炮弹的贴图。此时从model包的依赖包有tanktt、tarcktt、shelltt包，哪怕只是想加载model包中的炮弹，tanktt和tarcktt包也会因为依赖关系被一起加载。
 
+获取依赖信息：  
+
+        //加载主包
+        AssetBundle abMain=AssetBundle.LoadFromFile(Application.streamingAssetsPath+"/" + "StandaloneWindows");
+        //从主包加载依赖信息文件
+        AssetBundleManifest abManifest = abMain.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+        //从依赖文件中获取model的依赖包信息
+        string[] strs=abManifest.GetAllDependencies("model");
+        foreach (string str in strs)
+        {
+            print("model依赖包："+str);
+        }
 
 
 ### 1.4 AB包资源加载Mgr

@@ -9,6 +9,20 @@ public class ABTestforLoad : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //TestFirst();
+
+         GameObject obj =ABMgr.Instance.LoadRes<GameObject>("model","Cube");
+        obj.transform.position = Vector3.one*3;
+
+        ABMgr.Instance.LoadResAsync<GameObject>("model", "Cube", (o) =>
+        {
+            o.gameObject.SetActive(true);
+        });
+    }
+
+
+    private void TestFirst()
+    {
         //加载AB包,ab包不能重复加载
 
         AssetBundle bundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + "model");
@@ -29,6 +43,18 @@ public class ABTestforLoad : MonoBehaviour
 
         //异步加载
         StartCoroutine(LoadABRes("image", "Joe"));
+
+
+        //加载主包
+        AssetBundle abMain = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + "StandaloneWindows");
+        //从主包加载依赖信息文件
+        AssetBundleManifest abManifest = abMain.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+        //从依赖文件中获取model的依赖包信息
+        string[] strs = abManifest.GetAllDependencies("model");
+        foreach (string str in strs)
+        {
+            print("model依赖包：" + str);
+        }
 
     }
 
