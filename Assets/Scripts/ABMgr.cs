@@ -55,6 +55,7 @@ return "ANDROID";
 #endif
         }
     }
+    #region 同步加载
 
     public object LoadRes(string abName,string resName)
     {
@@ -127,7 +128,9 @@ return "ANDROID";
         }
 
     }
+    #endregion
 
+    #region  异步加载
 
     public void LoadResAsync(string abName, string resName, UnityAction<Object> callback)
     {
@@ -218,6 +221,7 @@ return "ANDROID";
             abDic.Add(abName, targetRequest.assetBundle);
         }
     }
+    #endregion
 
 
     /// <summary>

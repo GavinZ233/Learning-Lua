@@ -130,13 +130,71 @@ https://learn.unity.com/tutorial/assets-resources-and-assetbundles#5c7f8528edbc2
 
 ### 1.4 AB包资源加载Mgr
 
+#### ABMgr类
+|名称|作用|操作|
+|---|---|---|
+|+ ABMgr Instance|单例|访问本类时，如果为空实例化gameobject并附加本类，返回instance
+|- AssetBundle mainAB|记录主包|
+|- AssetBundleManifest mainifest|包依赖信息|
+|- Dictionary<string,AssetBundle> abDic|记录加载的AB包|
+|- string PathUrl|ab包路径地址|
+|- string MainABName|主包名称|
+|+ object LoadRes(string abName,string resName)|加载资源|LoadAB（abName），加载对应名称资源
+|+ object LoadRes(string abName, string resName,System.Type type)|加载资源|LoadAB（abName），加载对应名称对应type的资源
+|+ T LoadRes< T >(string abName, string resName)where T : Object|加载资源|（同上）泛型重载
+|- LoadAB(string abName)|加载ab包|异步加载ab包|检查主包，依赖包，目标包是否已经加载，没有加载时进行异步ab包加载，并记录到abDic
+|+ LoadResAsync(string abName, string resName, UnityAction< Object > callback)|对外公开异步加载方法|启动ReallyLoadResAsync（abName,resName,callback）
+|- IEnumerator ReallyLoadResAsync(string abName, string resName, UnityAction< Object > callback)|异步加载资源|LoadABAsync(abName),加载resName资源
+|+ LoadResAsync(string abName, string resName,System.Type type, UnityAction< Object > callback)|对外公开异步加载方法|启动ReallyLoadResAsync（abName,resName,type,callback）
+|- IEnumerator ReallyLoadResAsync(string abName, string resName, System.Type type, UnityAction<Object> callback)|异步加载type类型资源|LoadABAsync(abName),加载resName资源
+|+ LoadResAsync< T >(string abName, string resName, UnityAction< T > callback)where T : Object|对外公开异步加载方法|启动ReallyLoadResAsync< T >（abName,resName,callback）
+|- IEnumerator ReallyLoadResAsync< T >(string abName, string resName, UnityAction< T > callback) where T : Object|异步加载T类资源|LoadABAsync(abName),加载resName资源
+|- IEnumerator LoadABAsync(string abName)|异步加载ab包|检查主包，依赖包，目标包是否已经加载，没有加载时进行异步ab包加载，并记录到abDic
+|+ UnLoad(string abName)|卸载ab包|卸载目标包并从abDic中移出
+|+ ClearAB()|卸载所有ab包|卸载所有ab包并清空abDic和mainAB与manifest信息
+
+此类主要对外提供：
+1. 同步加载资源方法（三种重载）
+2. 异步加载资源方法（三种重载）
+3. 卸载AB包方法
 
 
 
-
+>ab包的加载中，如果没有指定类型，会加载第一个对应名称的资源,这就需要给定类型才能避免偏差，而lua是不支持泛型的，在lua热更中就需要在提供resName后面再提供type，保证准确性
 
 
 ## 2. Lua语法
+[Lua 5.3 参考手册](https://www.runoob.com/manual/lua53doc/contents.html)
+### 2.1 lua环境
+[luaforwindows](https://github.com/rjpcomputing/luaforwindows/releases) 
+
+### 2.2 注释
+> --单行注释    
+--[[多行        
+注释]]
+
+### 2.3 数据类型
+简单数据类型：nil，number，string，boolean      
+复杂数据类型：function，table，userdata，thread
+|数据类型|描述|
+|--|--|
+|nil|表示一个无效值，空|
+|boolean|false或者true|
+|number|表示双精度类型的实浮点数|
+|string|字符串，双引号和单引号都是string|
+|funciton|编写的函数|
+|userdata|表示任意存储在变量中的C数据结构|
+|thread|表示执行的独立线路，协同程序|
+|table|Lua 中的表（table）其实是一个"关联数组"（associative arrays），数组的索引可以是数字、字符串或表类型。在 Lua 里，table 的创建是通过"构造表达式"来完成，最简单构造表达式是{}，用来创建一个空表。|
+
+>lua中使用未声明的变量，默认为nil       
+print(a)      
+pring(type(a))  
+打印:nil   nil
+
+### 2.4 字符串操作
+
+
 
 
 ## 3. xLua
