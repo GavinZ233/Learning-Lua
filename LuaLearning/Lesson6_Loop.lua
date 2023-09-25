@@ -15,10 +15,10 @@ until num>5
 
 print("************for***********")
 
-for i=1,10 do -- 默认自增
+for i=1,10 do -- 默认++
 	print(i)
 end
 
-for i=1,10,2 do
+for i=1,10,4 do
 	print(i)
 end

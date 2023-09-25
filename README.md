@@ -271,6 +271,98 @@ print("321"+2) --字符串可以算数操作，自动转成number
 >Lua不持支switch
 
 ### 2.7 循环
+1. while
+
+        num=0
+        while num<5 do
+                print(num)
+                num=num+1
+        end
+2. do while
+
+        num=0
+        repeat
+                print(num)
+                num=num+1
+        until num>5  --直到满足，退出循环
+3. for
+
+        for i=1,10 do -- 默认+1
+                print(i)
+        end
+
+        for i=1,10,2 do  --设定+2
+                print(i)
+        end
+
+### 2.8 函数
+> lua的函数不支持重载，新申明的函数会覆盖老的
+
+
+1. 函数结构
+
+        function  FunName()
+                -- body
+        end
+
+        FunName = function()
+                -- body
+        end
+
+2. 反参
+
+        function F4(a)
+                return a
+        end
+        temp=F4("213")
+        print(temp)
+3. 变长参数
+
+        function F7(...)
+                arg={...}
+                for i=1 ,#arg do
+                        print(arg[i])
+                end
+        end
+        F7(3,1,4,76,"weq32")
+
+>
+
+4. 函数嵌套
+
+        function F8()
+                F9 =function() --内部声明一个函数
+                        print(123);
+                end
+                return F9  --返回函数
+        end
+        f9=F8()
+        f9()
+
+        function F9(x)
+                return function(y) --在return后直接申明函数
+                        return x+y 
+                end
+        end
+        print(F9(10)(1)) --调用外部函数后面加一个括号表示调用返回的函数
+
+
+### 2.9 Table
+>表是一切复杂数据的基础：数组，二维数组，字典，类等
+
+#### 1. 数组 
+
+索引从`1`开始   
+长度获取:`#`Nums        
+长度计算时，自动舍去末尾的nil   
+当自定义索引为数字时，长度忽略小于0的，且索引间隔大于1时长度默认为断开的索引值
+
+
+
+
+
+
+
 
 
 ## 3. xLua
