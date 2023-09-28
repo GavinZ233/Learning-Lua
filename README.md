@@ -355,12 +355,85 @@ print("321"+2) --字符串可以算数操作，自动转成number
 索引从`1`开始   
 长度获取:`#`Nums        
 长度计算时，自动舍去末尾的nil   
-当自定义索引为数字时，长度忽略小于0的，且索引间隔大于1时长度默认为断开的索引值
+当自定义索引为数字时，长度忽略小于0的，且索引间隔大于1时长度默认为断开处的索引值
+
+自定义索引被默认索引覆盖：        
+>t={[1]=1,[2]=2,[3]=3,4}        
+t={4,[1]=2,[3]=3,4}     
+打印 t[1] 都是4  
 
 
+#### 2. 遍历方法
 
+        --ipairs 类似#获取到长度根据长度遍历
+        for i,v in ipairs(t) do
+                print(i,v)
+        end
+        --pairs 将table所有键都找到
+        for k,v in pairs(t) do
+                print(k,v)
+        end
 
+        for k,v in pairs(c) do
+                --可以传多个参数，一样可以打印
+                print(k,v,3,4)
+        end
+        --声明_下划线代替key的参数获取，只打印value
+        for _,v in pairs(c) do
+                print(v)
+        end
 
+表的增删改      
+
+        c={["name"]="吴彦祖",["age"]=26}
+
+        print(c.name)
+        c["name"]="曾志伟"--直接赋值就是修改
+        print(c.name)
+
+        c["money"]=3--直接声明就是新增
+        print(c.money)
+
+        c["money"]=nil--置空就相当于删除
+        print(c.money)
+
+#### 3. 表模拟类
+
+在表内声明成员属性和方法
+
+        Student ={
+                age=1,
+                sex=true,
+                Up =function()
+                        print("up了")
+                end	
+        }
+但在外部也能添加
+
+        Student.name="吴彦祖"
+        --第一种声明方式
+        function Student.Speak()
+                print("speak"..Student.age)
+        end
+        --第二种声明方式
+        Student.Speak=function()
+                 print("speak"..Student.age)
+        end
+
+特殊的，方法调用方式有两种      
+第一种默认方法
+
+        Student.Speak()
+直接点调用，如果需要传参，就在（）内写入参
+
+第二种把调用者作为特殊入参
+
+        Student:Speak()
+对应的方法内部会使用self关键字代表特殊入参
+
+        function Student:Learn()
+                print("Learn"..self.name)
+        end
 
 
 
