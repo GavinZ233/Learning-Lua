@@ -435,6 +435,39 @@ t={4,[1]=2,[3]=3,4}
                 print("Learn"..self.name)
         end
 
+#### 4. 表的公共方法
+1. **插入**     
+table.insert(被插表，插入索引，插入元素)         
+无插入索引时，默认插入到 len+1处  
+
+        table.insert(t1,t2);
+        table.insert(t1,1,t2)
+
+2. **移除**     
+table.remove(要操作的表，移除索引)      
+无索引时，默认移除最后一位
+
+        table.remove(t1,1)
+        table.remove(t1)
+
+3. 排序    
+table.sort(排序的表，排序函数)  
+无排序函数时，默认升序
+
+        table.sort(t3)
+        table.sort(t3, function(a,b)
+                if a>b then
+                        return true
+                end
+        end)
+
+4. 拼接         
+table.concat(操作表，中间字符，拼接起点，拼接终点)      
+无拼接起点终点时，默认从头到尾          
+*只能拼接字符串与数字*
+
+        str=table.concat(tb, " ",2,3)
+        str=table.concat(t2,"")
 
 
 
