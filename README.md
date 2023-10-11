@@ -326,7 +326,7 @@ print("321"+2) --字符串可以算数操作，自动转成number
         end
         F7(3,1,4,76,"weq32")
 
->
+
 
 4. 函数嵌套
 
@@ -469,6 +469,100 @@ table.concat(操作表，中间字符，拼接起点，拼接终点)
         str=table.concat(tb, " ",2,3)
         str=table.concat(t2,"")
 
+### 2.10 脚本相关
+
+#### 1.脚本执行
+
+1. 脚本执行    
+会按顺序执行脚本逻辑，如果最后有return会返回反参
+
+        require('脚本名称')
+        returnValue=require('脚本名称')
+        --得到脚本反参
+
+>脚本只会执行一次，再次执行需要先卸载再执行
+
+
+2. 查看脚本执行    
+返回boolean表示是否执行
+
+        print(package.loaded['脚本名称'])
+
+3. 脚本卸载     
+将该loaded置空
+
+        package.loaded["脚本名称"]=nil
+
+
+#### 2. 本地变量     
+在方法或脚本内的变量前加 `local `该变量变为本地变量     
+如果没有 `local` 则属于全局变量记录在`_G`表中，在方法体或脚本外也可以访问   
+
+      
+>_G表，保存了lua所用的所有全局函数和全局变量
+
+### 2.11 特殊用法
+
+1. 多变量赋值   
+多变量赋值秉承了一贯作风，多给的参数舍去，少给的参数nil补上
+
+        a,b,c=1,false,"ghj"
+
+2. 多返回值     
+同上
+
+        function Test()
+                return 1,2,3,"ghj"
+        end
+        a,b,c,d,e=Test()
+
+
+3. and or
+
+        print(1 and false)
+        --短路原理，先判断and前是否为真，1为真，返回and后的false
+
+        print(1 or 2)
+        --短路原理，先判断1是否为真，1为真，返回1不需要执行or后的2
+        print(false or nil)
+        --false为假，返回nil
+
+>lua中，只有`nil`和`false`才是假
+
+4. 三目运算     
+C#中的三目运算` ? : `是封装好的语法糖,lua中没有实现可以自己通过and or手动实现
+
+        x=3
+        y=1
+        
+        res= (x>y) and x or y 
+        --x大于y，为true
+        --=> true and x or y
+        --true and x 返回x，
+        --=> x or y
+        --x 为真，返回x
+        --达到了（）内为真，返回x的效果
+
+        res= (x<y) and x or y 
+        --x不小于y，返回false，
+        --=> false and x or y
+        --flase and x 返回false
+        --=> false or y
+        --false跳过，返回y
+        --达到了（）内为假，返回y的效果
+
+### 2. 12 协程  
+就像C#中的协程，是协同程序，不是线程，分段执行不产生资源抢占
+
+|方法||使用场景|
+|--|--|--
+|coroutine.create(方法)|创建协程，返回一个thread|创建一个需要监测状态的协程
+|coroutine.wrap(方法)|创建协程，返回一个function|快速创建一个不需要监测状态的协程，像funciton一样使用
+|coroutine.resume(thread，传参)|执行thread协程|启动thread协程(多次执行都按照第一次的传参执行，后续的参数无法使用，有待深入了解原理)
+|function（）|执行协程方法|启动协程方法
+|coroutine.yield（可传参）|在协程内声明挂起当前协程，就像Unity中协程的yieldreturn，不过不会自动执行下一步|挂起协程返回当前数据
+|coroutine.status(thread)|获取协程的状态(dead,suspended,running)|监控协程的状态，决定是否关闭或开启
+|coroutine.running()|获取当前运行的协程号|
 
 
 ## 3. xLua
