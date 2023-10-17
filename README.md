@@ -82,6 +82,7 @@ https://learn.unity.com/tutorial/assets-resources-and-assetbundles#5c7f8528edbc2
 
 
 #### 1.3.2 异步加载AB包
+
         IEnumerator LoadABRes(string abName, string resName)
         {
           AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(Application.streamingAssetsPath + "/" + abName);
@@ -742,9 +743,91 @@ rawset会忽略newindex，写入到自己
 
 
 ### 2.15 函数库           
+ 
+#### 1. 时间
+
+        --系统时间(单位s)
+        print(os.time())
+        --传入日期得到s
+        print(os.time({year=2014,month=2,day=3}))
+        local nowTime=os.date("*t")
+        print(nowTime.min)
+
+#### 2. 数学
+
+        --绝对值
+        print(math.abs(-11))
+        --弧度转角度
+        print(math.deg(math.pi))
+        --三角函数,传弧度
+        print(math.cos(math.pi))
+        --向下取整
+        print(math.floor(2.6))
+        --向上取整
+        print(math.ceil(5.1))
+      
+        print(math.max(1,2))
+
+        print(math.min(4,5))
+        --分离小数，返回整数部分与小数部分
+        print(math.modf(1.2))
+        --幂运算
+        print(math.pow(2,5))
+
+        --随机数，先设置种子
+        math.randomseed(os.time())
+        --第一个是根据种子本身生成，种子改变了才会改变
+        print(math.random(300))
+        --第二个是根据种子信息生成，种子信息改变就会改变
+        print(math.random(300))
+        --开方
+        print(math.sqrt(9))
+
+#### 3. 路径
+
+        print(package.path)
+
+并不常用,单独用来调用lua时使用
+
+#### 4. 垃圾回收
+
+        --获取当前lua占用内存数 k字节 用返回值*1024 得到内存占用字节数
+        print(collectgarbage("count"))
+        --垃圾回收
+        collectgarbage("collect")
+
+
 
 
 ## 3. xLua
+
+### 3.1 准备阶段
+1. xLua框架             
+只取用项目中的 `Assets/Plugins` `Assets/Xlua` 文件夹          
+[xLua项目地址](https://github.com/Tencent/xLua)         
+
+2. AB包工具             
+见专题一1.1部分
+
+3. 单例基类（非必须）     
+泛型单例基类，简化单例类的重复声明。            
+参考
+[SimpleFrameWork](https://github.com/GavinZ233/Learning-SimpleFrameWork)
+专题一《单例模式基类》
+
+4. AB包管理器（非必须）         
+封装AB包同步异步加载操作，可根据项目重写             
+见专题一1.4部分
+
+
+
+
+
+
+
+
+
+
 
 
 ## 4. toLua
