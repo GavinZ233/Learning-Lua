@@ -821,14 +821,71 @@ rawset会忽略newindex，写入到自己
 
 
 
+### 3.2 C#调用Lua
+
+#### 1. Lua解析器       
+
+1. 引用命名空间         
+
+        using XLua;
+
+2. 创建Lua解析器
+
+        LuaEnv luaEnv = new LuaEnv();
+
+3. 执行Lua语言
+
+        //DoString（执行内容，报错信息）
+        luaEnv.DoString("print('嗨，你好')", "报错内容："+this.name);
+
+4. 执行Lua脚本  
+require默认寻找脚本的路径是在Resources下       
+大致是通过Resources.Load加载txt等,而无法读取.lua        
+因此Lua脚本后缀要加txt          
+文件名：Main.lua.txt
+
+        luaEnv.DoString("require('Main')");
+
+5. 垃圾回收     
+清理没有手动释放的对象
+
+        luaEnv.Tick();
+
+6. 关闭Lua解析器        
+不常用，解析器一般贯穿项目始终，不会关闭
+
+        luaEnv.Dispose();
 
 
+#### 2. 文件加载重定向  
 
+1. AddLoader    
+其中自定义方法被记录到委托List，如果自定义方法返回空，会一直执行到默认方法
 
+        //xlua提供的路径重定向的方法
+        //允许自定义加载Lua文件
+        //当我们执行Lua语言require时，相当于执行一个lua脚本
+        //他会执行我们自定义传入的函数
+        env.AddLoader(MyCustomLoader);
+        
+2. 自定义加载lua脚本方法
 
-
-
-
+        private byte[] MyCustomLoader(ref string filePath)
+        {
+                //自定义路径,访问lua文件
+                string path=Application.dataPath+"/Lua/"+filePath+".lua";
+                Debug.Log(path);
+                if (File.Exists(path))
+                {
+                //读取比特流返回
+                return  File.ReadAllBytes(path);
+                }
+                else
+                {
+                Debug.Log("MyCustomLoader重定向路径失败，文件名：" + filePath);
+                };
+                return null;
+        }
 
 ## 4. toLua
 

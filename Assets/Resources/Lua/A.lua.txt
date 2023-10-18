@@ -1,0 +1,1 @@
+print("Lua的Main脚本")

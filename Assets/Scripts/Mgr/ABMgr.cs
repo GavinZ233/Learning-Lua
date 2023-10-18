@@ -51,7 +51,7 @@ return "IOS";
 #elif UNITY_ANDROID
 return "ANDROID";
 #else 
-            return "StandaloneWindows";
+            return "PC";
 #endif
         }
     }
