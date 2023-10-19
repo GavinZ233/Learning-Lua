@@ -1,1 +1,16 @@
-print("重定向路径后的Main")
+print("启动Main脚本")
+
+
+require("Test")
+
+
+
+
+
+
+
+
+
+
+
+

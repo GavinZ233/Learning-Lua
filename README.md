@@ -887,6 +887,50 @@ require默认寻找脚本的路径是在Resources下
                 return null;
         }
 
+
+#### 3. LuaMgr
+|名称|作用|操作|
+|---|---|---|
+|+ LuaTable Global|提供lua的_G|返回luaEnv.Gloabal
+|- LuaEnv luaEnv|记录lua解析器|
+|+ Init()|初始化方法|初始化lua解析器，为解析器加入lua脚本加载方法
+|+ DoLuaFile(string fileName)|通过脚本名称执行lua脚本，避免了每次都require|拼接require与fileName，执行DoString()方法
+|+ DoString(string str)|执行lua语言|
+|+ Tick()|执行lua垃圾回收|
+|+ Dispose()|关闭解析器|dispose解析器，并将本地解析器记录置空
+|- byte[] CustomLoader(ref string filePath)|自定义lua文件读取，从Asset下读取|拼接Asset下的lua脚本路径，读取比特流并返回
+|- byte[] CustomABLoader(ref string filePath)|定义lua文件读取，从AB包中读取|读取lua文件的AB包，从包中获取TextAsset，返回其中bytes
+
+>AB包中的Lua脚本也需要将后缀名改为txt，鉴于修改后缀与打AB包过程繁琐，日常开发都读取Asset路径下的Lua脚本，测试阶段再统一改后缀打包。     
+修改后缀后，第一个CustomLoader读取不到后缀为".lua"的文件，返空，解析器会继续执行CustomABLoader找AB包中的".lua.txt"文件
+
+
+
+#### 4. 全局变量的获取
+
+        //初始化解析器
+        LuaMgr.GetInstance().Init();
+        //执行主脚本
+        LuaMgr.GetInstance().DoLuaFile("LuaMain");
+        //获取number保存为int
+        int i = LuaMgr.GetInstance().Global.Get<int>("testNumber");
+        //获取number保存为double
+        double d = LuaMgr.GetInstance().Global.Get<double>("testNumber");
+        //获取string
+        string s = LuaMgr.GetInstance().Global.Get<string>("testString");
+        //修改数据
+        LuaMgr.GetInstance().Global.Set("testNumber", 66);
+        LuaMgr.GetInstance().Global.Set("testString", "修改了string");
+
+>其中数据获取为值拷贝，string也是
+
+
+#### 5. 全局变量的获取
+
+
+
+
+
 ## 4. toLua
 
 
