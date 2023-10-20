@@ -925,9 +925,141 @@ require默认寻找脚本的路径是在Resources下
 >其中数据获取为值拷贝，string也是
 
 
-#### 5. 全局变量的获取
+#### 5. 全局函数的获取
+
+##### 1. 无参无返回方法               
+委托部分：      
+
+        public delegate void CustomCall();
+执行部分:               
+
+        CustomCall call = LuaMgr.GetInstance().Global.Get<CustomCall>("testNoINAndOUT");
+        call();
+        //使用UnityAction
+        UnityAction callUA = LuaMgr.GetInstance().Global.Get<UnityAction>("testNoINAndOUT");
+        callUA();
+        //使用Action
+        Action callA = LuaMgr.GetInstance().Global.Get<Action>("testNoINAndOUT");
+        callA();
+        //Xlua提供的获取方式
+        LuaFunction lf = LuaMgr.GetInstance().Global.Get<LuaFunction>("testNoINAndOUT");
+        lf.Call();
+
+其中有四种调用方式，使用Action比较方便            
+
+##### 2. 有参有返回方法               
+委托部分：      
+
+        [CSharpCallLua]
+        public delegate int CustomCall2(int i);
+执行部分：
+
+        CustomCall2 call2 = LuaMgr.GetInstance().Global.Get<CustomCall2>("testHasINAndOUT");
+         int returnNum = call2(3);
+        print(returnNum);
 
 
+        Func<int,int> sFunc=LuaMgr.GetInstance().Global.Get<Func<int,int>>("testHasINAndOUT");
+        int returnsFunc = call2(88);
+        print(returnsFunc);
+
+>自定义委托时，需要添加特性`[CSharpCallLua]`，Xlua生成代码向xlua解释器注册委托才能使用,Func是系统提供的委托XLua已经处理过
+
+
+##### 3. 多返回值方法         
+委托部分：      
+
+        [CSharpCallLua]
+        public delegate void CustomCall3(int ina, out int a, out string b, out bool c);
+        [CSharpCallLua]
+        public delegate int CustomCall4(int ina, ref string b, ref bool c);
+执行部分：
+
+        CustomCall3 customCall3 = LuaMgr.GetInstance().Global.Get<CustomCall3>("testMultipleOUT");
+        int a;
+        string b;
+        bool c;
+        customCall3(1,out a,out b,out c);
+        Debug.Log(a+"  "+b+"   "+c);
+
+        CustomCall4 customCall4 = LuaMgr.GetInstance().Global.Get<CustomCall4>("testMultipleOUT");
+        int a1=0;
+        string b1=null;
+        bool c1=false;
+        a1 = customCall4(1,  ref b1, ref c1);
+        Debug.Log(a1 + "  " + b1 + "   " + c1);
+
+        //Xlua
+        LuaFunction lf3 = LuaMgr.GetInstance().Global.Get<LuaFunction>("testMultipleOUT");
+        object[] objs=lf3.Call(5);
+        for (int i = 0; i < objs.Length; i++)
+        {
+            Debug.Log(string.Format("第{0}个返回值:" + objs[i], i));
+        }
+
+>当定义了委托的返回值时，lua的function第一个返回值就是委托的返回值，从第二个开始才是后续反参
+
+##### 4. 变长入参方法
+委托部分：
+
+        [CSharpCallLua]
+        public delegate void CustomCall5(params string[] args);
+执行方法：
+
+        CustomCall5 customCall5 = LuaMgr.GetInstance().Global.Get<CustomCall5>("testMultipleIn");
+        customCall5("asfa", "dasd", "abc");
+
+        LuaFunction lf4 = LuaMgr.GetInstance().Global.Get<LuaFunction>("testMultipleIn");
+        lf4.Call("wqe", 321, true);
+
+
+##### 5.思考
+
+LuaFunction每种情况都适用，因为该方法的入参和反参都是object[]，就像C#中用arraylist装东西一样，万能但浪费，频繁拆装箱。              
+自定义委托需要添加特性之后在窗口XLua=>Generate Code生成代码，让Xlua记录该委托，如果添加新委托，重新生成即可，修改委托则需要先Clear Generate Code再生成。        
+
+
+#### 6. list和dictionary映射table
+
+##### 1. 数组
+lua代码：      
+
+        testList={1,2,3,4,5}
+        testArray={"wqe",321,true}
+C#代码：
+
+        List<int> list = LuaMgr.GetInstance().Global.Get<List<int>>("testList");
+        List<object> list3 = LuaMgr.GetInstance().Global.Get<List<object>>("testArray");
+
+
+##### 2. 字典
+lua代码：      
+
+        testDic={
+                ["1"]=1,
+                ["2"]=14,
+                ["3"]=21,
+                ["4"]=45
+        }
+        testDic2={
+                ["1"]=true,
+                [true]=1,
+                [false]=0,
+                ["a"]="abcd"
+
+        }
+
+
+C#代码：
+
+        Dictionary<string, int> dic = LuaMgr.GetInstance().Global.Get<Dictionary<string, int>>("testDic");
+        Dictionary<object, object> dic2 = LuaMgr.GetInstance().Global.Get<Dictionary<object, object>>("testDic2");
+
+
+##### 3. 思考
+与获取值相同，都是使用Get方法
+
+>从C#读取lua数据都是深拷贝，在C#创建一份全新的数据，修改C#部分不影响lua部分的数据
 
 
 

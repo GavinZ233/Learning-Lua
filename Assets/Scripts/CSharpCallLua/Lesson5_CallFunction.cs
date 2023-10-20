@@ -10,6 +10,14 @@ public delegate void CustomCall();
 //有参有反回的自定义委托需要加特性标识（无参无返回的被系统处理过了），xlua会根据特性生成对应的lua代码，Xlua-Generate Code
 [CSharpCallLua]
 public delegate int CustomCall2(int i);
+[CSharpCallLua]
+public delegate void CustomCall3(int ina, out int a, out string b, out bool c);
+[CSharpCallLua]
+public delegate int CustomCall4(int ina, ref string b, ref bool c);
+//当定义了委托的返回值时，lua的function第一个返回值就是委托的返回值，从第二个开始才是后续反参
+
+[CSharpCallLua]
+public delegate void CustomCall5(params string[] args);
 
 
 public class Lesson5_CallFunction : MonoBehaviour
@@ -48,21 +56,37 @@ public class Lesson5_CallFunction : MonoBehaviour
         //*****************多返回值***********************
 
 
+        CustomCall3 customCall3 = LuaMgr.GetInstance().Global.Get<CustomCall3>("testMultipleOUT");
+        int a;
+        string b;
+        bool c;
+        customCall3(1,out a,out b,out c);
+        Debug.Log(a+"  "+b+"   "+c);
 
+        CustomCall4 customCall4 = LuaMgr.GetInstance().Global.Get<CustomCall4>("testMultipleOUT");
+        int a1=0;
+        string b1=null;
+        bool c1=false;
+        a1 = customCall4(1,  ref b1, ref c1);
+        Debug.Log(a1 + "  " + b1 + "   " + c1);
 
-
-
-
-
-
+        //Xlua
+        LuaFunction lf3 = LuaMgr.GetInstance().Global.Get<LuaFunction>("testMultipleOUT");
+        object[] objs=lf3.Call(5);
+        for (int i = 0; i < objs.Length; i++)
+        {
+            Debug.Log(string.Format("第{0}个返回值:" + objs[i], i));
+        }
 
 
         //*****************变长参数***********************
 
 
+        CustomCall5 customCall5 = LuaMgr.GetInstance().Global.Get<CustomCall5>("testMultipleIn");
+        customCall5("asfa", "dasd", "abc");
 
-
-
+        LuaFunction lf4 = LuaMgr.GetInstance().Global.Get<LuaFunction>("testMultipleIn");
+        lf4.Call("wqe", 321, true);
 
 
 

@@ -22,8 +22,8 @@ end
 
 
 --多返回值
-testMultipleOUT =function ()
-	print("多返回值")
+testMultipleOUT =function (a)
+	print("多返回值"..a)
 	return 3,"wqe",false
 end
 
@@ -37,6 +37,25 @@ testMultipleIn =function (...)
 		print(k,v)
 	end
 end
+
+
+
+testList={1,2,3,4,5}
+testArray={"wqe",321,true}
+
+testDic={
+	["1"]=1,
+	["2"]=14,
+	["3"]=21,
+	["4"]=45
+}
+testDic2={
+	["1"]=true,
+	[true]=1,
+	[false]=0,
+	["a"]="abcd"
+
+}
 
 
 
