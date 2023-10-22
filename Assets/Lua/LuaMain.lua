@@ -1,7 +1,7 @@
 print("启动Main脚本")
 
 
-require("Test")
+require("Lesson1_CallClass")
 
 
 

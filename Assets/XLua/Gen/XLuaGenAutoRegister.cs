@@ -172,6 +172,8 @@ namespace XLua.CSObjectWrap
             wrapInit0(luaenv, translator);
             
             
+            translator.AddInterfaceBridgeCreator(typeof(ICSharpCallInterface), ICSharpCallInterfaceBridge.__Create);
+            
             translator.AddInterfaceBridgeCreator(typeof(System.Collections.IEnumerator), SystemCollectionsIEnumeratorBridge.__Create);
             
             translator.AddInterfaceBridgeCreator(typeof(XLuaTest.IExchanger), XLuaTestIExchangerBridge.__Create);

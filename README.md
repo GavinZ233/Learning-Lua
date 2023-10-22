@@ -1013,7 +1013,7 @@ require默认寻找脚本的路径是在Resources下
         lf4.Call("wqe", 321, true);
 
 
-##### 5.思考
+##### 思考
 
 LuaFunction每种情况都适用，因为该方法的入参和反参都是object[]，就像C#中用arraylist装东西一样，万能但浪费，频繁拆装箱。              
 自定义委托需要添加特性之后在窗口XLua=>Generate Code生成代码，让Xlua记录该委托，如果添加新委托，重新生成即可，修改委托则需要先Clear Generate Code再生成。        
@@ -1056,10 +1056,128 @@ C#代码：
         Dictionary<object, object> dic2 = LuaMgr.GetInstance().Global.Get<Dictionary<object, object>>("testDic2");
 
 
-##### 3. 思考
+#####  思考
 与获取值相同，都是使用Get方法
 
 >从C#读取lua数据都是深拷贝，在C#创建一份全新的数据，修改C#部分不影响lua部分的数据
+
+#### 7. 类映射table
+用lua 的table模拟C#的类         
+lua类：
+
+        testClass={
+	        testInt=3,
+	        testBool=true,
+	        testFloat=3.2,
+	        testString="qwe",
+	        testFun=function()
+		        print("testClass打印")
+	        end,
+	        testInClass={
+		        testInInt=123
+	        }
+        }
+
+C#类：          
+
+        public class CallLuaClass
+        {
+                public int testInt;
+                public bool testBool; 
+                public float testFloat;
+                public string testString;
+                public UnityAction testFun;
+
+                public CallLuaInClass testInClass;
+        }
+
+        public class CallLuaInClass
+        {
+                public int testInInt;
+        }
+
+
+C#调用代码:
+
+        CallLuaClass clc = LuaMgr.GetInstance().Global.Get<CallLuaClass>("testClass");
+        clc.testFun();
+
+
+>C#的成员变量需要与Lua表中的名称一致，名称无法吻合的成员会被忽略        
+成员属性中的类也会被一起实例化
+
+
+#### 8. 接口映射table
+lua代码同7                
+C#代码:
+
+        [CSharpCallLua]
+        public interface ICSharpCallInterface
+        {
+        public int testInt
+        {
+                get;
+                set;
+        }
+
+        public bool testBool
+        {
+                get;
+                set;
+        }
+
+        public float testFloat
+        {
+                get;
+                set;
+        }
+        
+        public string testString
+        {
+                get;
+                set;
+        }
+
+        public UnityAction testFun
+        {
+                get;
+                set;
+        }
+        }
+
+>接口内部是属性不是字段，需要加上特性`[CSharpCallLua]`，并且是浅拷贝，通过C#部分修改数据lua部分也会被修改
+
+
+#### 9. C#调用LuaTable
+
+调用代码：
+
+        //LuTable装table
+        LuaTable table = LuaMgr.GetInstance().Global.Get<LuaTable>("testClass");
+        //get方法直接执行
+        table.Get<LuaFunction>("testFun").Call();
+        //使用完释放LuaTable
+        table.Dispose();
+
+>xLua提供的LuaTable类，对获取到的数据浅拷贝，C#端修改lua端也会被影响。          
+并且调用繁琐，不常用。          
+
+
+>在自定义委托和接口需要添加CSharpCallLua特性
+
+
+
+### 3.3 lua调C#
+
+#### 1. 调用类
+因为主体是Unity，所以Lua调用C#的前提是，C#先打开Lua     
+由此，先创建一个C#的`Main`脚本，负责调用Lua的主脚本`LuaMain`            
+后续再用`LuaMain`执行lua逻辑脚本               
+
+
+
+
+#### 2. 
 
 
 

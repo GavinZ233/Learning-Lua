@@ -59,3 +59,27 @@ testDic2={
 
 
 
+testClass={
+	testInt=3,
+	testBool=true,
+	testFloat=3.2,
+	testString="qwe",
+	testFun=function()
+		print("testClass打印")
+	end,
+	testInClass={
+		testInInt=123
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
