@@ -10,7 +10,7 @@ lua课程学习笔记
 |AB包||
 |Lua语法||
 |xLua||
-|toLua||
+|Hotfix||
 |xLua的背包系统||
 
 ## 1. AB包
@@ -796,7 +796,8 @@ rawset会忽略newindex，写入到自己
         --垃圾回收
         collectgarbage("collect")
 
-
+贴一个剖析XluaGC的博客，抽空再看          
+[Unity下XLua方案的各值类型GC优化深度剖析](https://gwb.tencent.com/community/detail/111993)
 
 
 ## 3. xLua
@@ -1169,19 +1170,374 @@ C#代码:
 
 ### 3.3 lua调C#
 
-#### 1. 调用类
+#### 1. 类
+1. 准备         
 因为主体是Unity，所以Lua调用C#的前提是，C#先打开Lua     
 由此，先创建一个C#的`Main`脚本，负责调用Lua的主脚本`LuaMain`            
 后续再用`LuaMain`执行lua逻辑脚本               
 
+2. 调用类       
+调用类需要写出路径，`CS`是基础，`UnityEngine`是命名空间，`GameObject`是类名                                        
+实例化方法就是该类同名方法，所以直接调用类名就是一次实例化
+
+        --有命名空间
+        local obj1=CS.UnityEngine.GameObject("新物体")
+        --无命名空间
+        local obj2=CS.Test()
+
+3. 静态方法静态变量             
+直接在类后面`.`即可
+
+        local findObj =CS.UnityEngine.GameObject.Find("新物体")
+
+4. 成员方法成员变量             
+在实例化的类后`.`出成员变量             
+在实例化的类后`:`出成员方法，不用`.`是因为成员方法往往需要操作自身，`:`是会传入自身的调用方法
+
+        print(newObj.transform.position)
+        findObj.transform:Translate(Vector3.right)
+
+5. 类记录到Global               
+可以在_G表记录常用的类，避免每次都要写长串的路径        
+
+        Debug=CS.UnityEngine.Debug
+        Vector3=CS.UnityEngine.Vector3
+        GameObject =CS.UnityEngine.GameObject
+        --使用
+        local obj=GameObject()
+        Debug.Log(obj.transform.position)
 
 
 
-#### 2. 
+#### 2. 枚举
+1. 记录         
+像类一样，可以记录到Global      
+
+        --记录枚举的路径
+        PrimitiveType=CS.UnityEngine.PrimitiveType
+        MyEnum=CS.E_MyEnum
+
+2. 使用
+直接点出来内容，就像C#中一样使用
+
+        local obj=GameObject.CreatePrimitive(PrimitiveType.Cube)
+        local idle=MyEnum.Idle
+        print(idle)
+
+3. 转换
+可以由数字和字符串转换到目标枚举                
+不同的是，如果找不到目标字符串会报错，找不到目标数字会自动返回一个临时的数字枚举（并不会记录到枚举中，无用的知识增加了）
+
+        local intEnum=MyEnum.__CastFrom(2)
+        print(intEnum)
+
+        local stringEnum = MyEnum.__CastFrom("Move")
+        print(stringEnum)
+
+
+#### 3. 数组列表字典
+以上数据都是C#的数据结构，被lua读取时，以userdata存储不是table，操作方式需按照C#的方式执行
+
+1. 数组         
+
+        --使用基类Array实例化数组
+        local array2=CS.System.Array.CreateInstance(typeof(CS.System.Int32),5)
+        print("数组长度： "..array2.Length )
+        print("数组内容：  ".. array2[4])
+        --遍历，按照C#的逻辑，从0开始，到Length-1
+        for i=0,array2.Length-1 do
+                print(array2[i])
+        end
+
+2. 列表         
+特别的当xlua版本低于 v2.1.12时，需要下面方法实例化              
+local list3=CS.System.Collections.Generic["List`1[System.String]"]()
+
+        --list是泛型，先记录String类型List
+        local List_String=CS.System.Collections.Generic.List(CS.System.String)
+        --再实例化
+        local list3=List_String() 
+        list3:Add("添加元素3")
+        --遍历
+        for i=0,list3.Count-1 do
+                print(list3[i])
+        end
 
 
 
-## 4. toLua
+3. 字典
+当xlua版本低于 v2.1.12时，也需要和列表类似的实例化方法
+
+        --记录字典类
+        local Dic_String_Vector3=CS.System.Collections.Generic.Dictionary(CS.System.String,CS.UnityEngine.Vector3)
+        --实例化字典
+        local dic2=Dic_String_Vector3()
+        --调用成员方法
+        dic2:Add("right",CS.UnityEngine.Vector3.right)
+        --遍历,使用pairs
+        for k,v in pairs(dic2) do
+                print(k,v)
+        end
+        --需要通过get_Item方法获得
+        print(dic2:get_Item("right"))
+        --修改通过set_Item
+        dic2:set_Item("right",CS.UnityEngine.Vector3.up)
+        print(dic2:get_Item("right"))
+        --TryGetValue有两个返回值，一个返回是否成功，一个返回值
+        print(dic2:TryGetValue("right3"))
+
+
+#### 4. 拓展方法
+
+C#代码:         
+
+        [LuaCallCSharp]
+        public static class Tools
+        {
+                //拓展方法需要传入目标类
+                public static void Move(this Lesson4 obj)
+                {
+                        Debug.Log(obj.name + "移动前: "+obj.step);
+                        obj.step += 1;
+                        Debug.Log(obj.name + "移动后：" +obj.step);
+                }
+        }
+
+        public class Lesson4
+        {
+                public string name = "吴彦祖";
+                public int step = 0;
+                public void Speak(string str)
+                {
+                        Debug.Log(str);
+                }
+
+                public static void Eat()
+                {
+                        Debug.Log("吃东西");
+                }
+        }
+lua调用：
+
+        --记录类
+        Lesson4=CS.Lesson4
+        --静态方法，类名.静态方法()
+        Lesson4.Eat()
+        --实例化
+        local obj=Lesson4()
+        --执行成员方法
+        obj:Speak("开始说话")
+        --使用拓展方法和成员方法一致
+        obj:Move()
+
+
+尽量对Lua中要使用的类添加`[LuaCallCSharp]`特性，Xlua会记录该类，避免使用默认的反射机制，反射效率较低
+
+
+此处引申出Lua与C#调用的深坑，目前搜罗到的博客如下               
+[如何实现两门语言互相调用](https://gwb.tencent.com/community/detail/105650)
+
+#### 5. ref和out
+
+在lua中也要遵循C#中的ref和out规则，ref需要传值，out不用，二者都会返回值         
+
+C#代码:
+
+    public int RefFun(int a,ref int b,ref int c,int d)
+    {
+        b = a + b;
+        c = c+d;
+        return 100;
+    }
+    public int OutFun(int a, out int b, out int c, int d)
+    {
+        b = a + d;
+        c = a - d;
+        return 200;
+    }
+    public int RefOutFun(int a, out int b, ref int c)
+    {
+        b = a *10;
+        c = a *20;
+        return 300;
+    }
+lua代码：
+
+        local a,b,c=obj:RefFun(1,1,2,2)
+        local a,b,c=obj:OutFun(20,30)
+        local a,b,c=obj:RefOutFun(2,1)
+
+
+>lua调C#时，函数多返回值，第一个值是方法返回值，后面的才是ref与out的返回值
+
+
+#### 6. 重载函数
+
+lua支持调用C#重载函数，但是当参数个数相同精度不同时，会分不清参数精度             
+
+C#代码：
+
+        public class Lesson6
+        {
+                public int Calc()
+                {
+                        return 100;
+                }
+                public int Calc(int a)
+                {
+                        return a;
+                }
+                public int Calc(int a,int b)
+                {
+                        return a + b;
+                }
+                public float Calc(float a)
+                {
+                        return a;
+                }
+        }
+
+
+lua调用：
+
+        local obj=CS.Lesson6()
+
+        print(obj:Calc())
+        print(obj:Calc(2))
+        print(obj:Calc(3,1))
+        print(obj:Calc(3.3))
+入参3.3时会出问题，因为lua中只有number一种数值类型，而C#有多种，lua分不清`Calc(int a)`与`Calc(float a)`         
+
+有解决重载函数含糊的方法，但不建议使用，实际使用应该避免以上情况。
+
+Xlua提供的反射解决方案:
+
+        --得到指定函数的相关信息
+        local m1=typeof(CS.Lesson6):GetMethod("Calc",{typeof(CS.System.Int32)})
+        local m2=typeof(CS.Lesson6):GetMethod("Calc",{typeof(CS.System.Single)}) --Float的类名
+        --通过xlua提供的方法，转成lua函数使用
+        --转一次，重复使用
+        local  f1=xlua.tofunction(m1)
+        local  f2=xlua.tofunction(m2)
+        print(f1(obj,99))
+        print(f2(obj,9.9))
+
+
+#### 7. 委托与事件
+
+##### 7.1 委托
+
+1. 添加委托     
+
+        --lua中不能对nil的委托 + 第一次需要先等于
+        obj.del=fun
+        obj.del=obj.del+function()
+                print("类似的匿名函数")
+        end
+
+2. 执行委托
+
+        obj.del()
+
+3. 移除委托
+
+        obj.del=obj.del-fun
+        --委托置空
+        obj.del=nil
+
+
+##### 7.2 事件
+
+1. 添加事件     
+
+        obj:eventAction("+",fun2)
+        obj:eventAction("+",function()
+                print("事件的匿名函数")
+        end)
+
+2. 执行事件             
+事件不能给外部执行，所以只能执行类内部提供的执行方法
+
+        obj:DoEvent()
+
+3. 移除事件
+事件不能给外部直接赋值，所以也需要执行类内部提供的置空方法
+
+        obj:eventAction("-",fun2)
+        obj:Clear()
+
+
+#### 8. 特殊问题
+
+##### 8.1 二维数组遍历
+
+1. 数组的长度获取
+
+        print("行:"..obj.array:GetLength(0))
+        print("列:"..obj.array:GetLength(1))
+
+
+2. 数组的值读取
+
+        print(obj.array:GetValue(0,0))
+
+
+
+
+##### 8.2 null和nil比较
+
+`nil`和`null` 无法`==`比较              
+
+但是可以使用以下三种方法比较    
+1. lua的方法
+该方法只能判断继承C#的System.Objcet的类
+
+        local rig  = obj1:GetComponent(typeof(Rigidbody))
+        if IsNull(rig) then
+        	print("无")
+        end
+
+2. 自定义一个lua全局方法
+
+        function IsNull(obj)
+                if obj==nil or obj:Equals(nil) then
+                        return true
+                end
+                return false
+        end
+
+        if rig:Equals(nil) then
+                print("无")
+        end
+
+3. C#提供Object的拓展方法       
+该方法只能判断继承UnityEngine.Objcet的类
+
+        [LuaCallCSharp]
+        public static class Lesson9
+        {
+                public static bool IsNull(this Object obj)
+                {
+                        return obj == null;
+                }
+        }
+
+        --lua调用
+        if rig:IsNull() then
+                print("无")
+        end
+
+
+
+##### 8.3 lua访问系统类型
+
+
+
+
+
+
+
+## 4. Hotfix
 
 
 ## 5. xLua的背包系统
