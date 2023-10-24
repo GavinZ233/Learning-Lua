@@ -61,7 +61,18 @@ else
 end
 
 
+print("*****************************系统类型*******************************")
 
+UI=CS.UnityEngine.UI
+GameObject=CS.UnityEngine.GameObject
+local slider=GameObject.Find("Slider")
+print(slider)
+
+local sliderScript=slider:GetComponent(typeof(UI.Slider))
+print(sliderScript)
+sliderScript.onValueChanged:AddListener(function(f)
+	print(f)
+end)
 
 
 

@@ -1,4 +1,4 @@
-print("启动Main脚本")
+print("启动HotfixMain脚本")
 
 
 function IsNull(obj)
@@ -12,7 +12,7 @@ end
 
 
 
-require("Lesson10_Generic")
+require("Hotfix_Lesson3")
 
 
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -13,20 +14,79 @@ public class LuaCallCSharp : MonoBehaviour
     }
 
 }
+#region 调用泛型方法
 
+public class Lesson12
+{
+    public interface ITest
+    { }
+    public class TestFather
+    {
+
+    }
+    public class TestChild:TestFather,ITest 
+    { }
+    public void TestFun1<T>(T a, T b)where T : TestFather 
+    {
+        Debug.Log("有参数有约束的泛型方法");
+    }
+
+    public void TestFun2<T>(T a)
+    {
+        Debug.Log("有参数没约束");
+    }
+
+    public void TestFun3<T>() where T : TestFather
+    {
+        Debug.Log("有参数有约束的泛型方法");
+    }
+
+    public void TestFun4<T>(T a) where T : ITest
+    {
+        Debug.Log("有约束有参数，约束不是类");
+    }
+
+
+
+
+
+}
+
+
+
+#endregion
+#region 系统类型加特性
+
+public static class Lesson10
+{
+    [CSharpCallLua]
+    public static List<Type> csharpCallLuaList = new List<Type>()
+    {
+        typeof(UnityAction<float>)
+        //自定义委托也可以加载列表中，都会被特性标注记录到xlua中
+    };
+
+    [LuaCallCSharp]
+    public static List<Type> luaCallCSharpList = new List<Type>()
+    {
+        typeof (GameObject),
+        typeof(Rigidbody)
+    };
+}
+
+
+#endregion
 #region 判空
 
 [LuaCallCSharp]
 public static class Lesson9
 {
     //拓展一个Object判空的方法，给lua使用，lua 没有null
-    public static bool IsNull(this Object obj)
+    public static bool IsNull(this UnityEngine.Object obj)
     {
         return obj == null;
     }
 }
-
-
 
 #endregion
 #region 二维数组遍历

@@ -2,38 +2,9 @@
 
 <linker>
 
-	<assembly fullname="Assembly-CSharp">
-	    <type fullname="Lesson9" preserve="all"/>
-		<type fullname="Tools" preserve="all"/>
-		<type fullname="Tutorial.BaseClass" preserve="all"/>
-		<type fullname="Tutorial.TestEnum" preserve="all"/>
-		<type fullname="Tutorial.DerivedClass" preserve="all"/>
-		<type fullname="Tutorial.ICalc" preserve="all"/>
-		<type fullname="Tutorial.DerivedClassExtensions" preserve="all"/>
-		<type fullname="XLuaTest.LuaBehaviour" preserve="all"/>
-		<type fullname="XLuaTest.Pedding" preserve="all"/>
-		<type fullname="XLuaTest.MyStruct" preserve="all"/>
-		<type fullname="XLuaTest.MyEnum" preserve="all"/>
-		<type fullname="XLuaTest.NoGc" preserve="all"/>
-		<type fullname="XLuaTest.BaseTest" preserve="all"/>
-		<type fullname="XLuaTest.Foo1Parent" preserve="all"/>
-		<type fullname="XLuaTest.Foo2Parent" preserve="all"/>
-		<type fullname="XLuaTest.Foo1Child" preserve="all"/>
-		<type fullname="XLuaTest.Foo2Child" preserve="all"/>
-		<type fullname="XLuaTest.Foo" preserve="all"/>
-		<type fullname="XLuaTest.FooExtension" preserve="all"/>
-		<type fullname="Tutorial.DerivedClass+TestEnumInner" preserve="all"/>
-		
-	</assembly>
-
-	<assembly fullname="mscorlib">
-	    <type fullname="System.Object" preserve="all"/>
-		<type fullname="System.Collections.Generic.List`1[System.Int32]" preserve="all"/>
-		
-	</assembly>
-
 	<assembly fullname="UnityEngine.CoreModule">
-	    <type fullname="UnityEngine.Object" preserve="all"/>
+	    <type fullname="UnityEngine.GameObject" preserve="all"/>
+		<type fullname="UnityEngine.Object" preserve="all"/>
 		<type fullname="UnityEngine.Vector2" preserve="all"/>
 		<type fullname="UnityEngine.Vector3" preserve="all"/>
 		<type fullname="UnityEngine.Vector4" preserve="all"/>
@@ -43,7 +14,6 @@
 		<type fullname="UnityEngine.Bounds" preserve="all"/>
 		<type fullname="UnityEngine.Ray2D" preserve="all"/>
 		<type fullname="UnityEngine.Time" preserve="all"/>
-		<type fullname="UnityEngine.GameObject" preserve="all"/>
 		<type fullname="UnityEngine.Component" preserve="all"/>
 		<type fullname="UnityEngine.Behaviour" preserve="all"/>
 		<type fullname="UnityEngine.Transform" preserve="all"/>
@@ -58,6 +28,41 @@
 		<type fullname="UnityEngine.Mathf" preserve="all"/>
 		<type fullname="UnityEngine.Debug" preserve="all"/>
 		<type fullname="UnityEngine.WaitForSeconds" preserve="all"/>
+		
+	</assembly>
+
+	<assembly fullname="UnityEngine.PhysicsModule">
+	    <type fullname="UnityEngine.Rigidbody" preserve="all"/>
+		
+	</assembly>
+
+	<assembly fullname="Assembly-CSharp">
+	    <type fullname="Lesson9" preserve="all"/>
+		<type fullname="Tools" preserve="all"/>
+		<type fullname="Tutorial.BaseClass" preserve="all"/>
+		<type fullname="Tutorial.TestEnum" preserve="all"/>
+		<type fullname="Tutorial.DerivedClass" preserve="all"/>
+		<type fullname="Tutorial.DerivedClass+TestEnumInner" preserve="all"/>
+		<type fullname="Tutorial.ICalc" preserve="all"/>
+		<type fullname="Tutorial.DerivedClassExtensions" preserve="all"/>
+		<type fullname="XLuaTest.LuaBehaviour" preserve="all"/>
+		<type fullname="XLuaTest.Pedding" preserve="all"/>
+		<type fullname="XLuaTest.MyStruct" preserve="all"/>
+		<type fullname="XLuaTest.MyEnum" preserve="all"/>
+		<type fullname="XLuaTest.NoGc" preserve="all"/>
+		<type fullname="XLuaTest.BaseTest" preserve="all"/>
+		<type fullname="XLuaTest.Foo1Parent" preserve="all"/>
+		<type fullname="XLuaTest.Foo2Parent" preserve="all"/>
+		<type fullname="XLuaTest.Foo1Child" preserve="all"/>
+		<type fullname="XLuaTest.Foo2Child" preserve="all"/>
+		<type fullname="XLuaTest.Foo" preserve="all"/>
+		<type fullname="XLuaTest.FooExtension" preserve="all"/>
+		
+	</assembly>
+
+	<assembly fullname="mscorlib">
+	    <type fullname="System.Object" preserve="all"/>
+		<type fullname="System.Collections.Generic.List`1[System.Int32]" preserve="all"/>
 		
 	</assembly>
 

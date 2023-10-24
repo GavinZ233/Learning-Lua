@@ -1531,15 +1531,231 @@ Xlua提供的反射解决方案:
 
 ##### 8.3 lua访问系统类型
 
+lua无法直接使用系统类型float，int等，提示需要添加call的特性，而系统类型无法修改。             
+由此引出新的方法:               
+将需要两个语言互相调用的类型全部添加到对应的list当中，给list添加特性，整个list就会被lua记录下来
+
+        public static class Lesson10
+        {
+                [CSharpCallLua]
+                public static List<Type> csharpCallLuaList = new List<Type>()
+                {
+                        typeof(UnityAction<float>)
+                        //自定义委托也可以加载列表中，都会被特性标注记录到xlua中
+                };
+
+                [LuaCallCSharp]
+                public static List<Type> luaCallCSharpList = new List<Type>()
+                {
+                        typeof(GameObject),
+                        typeof(Rigidbody)
+                };
+        }
+
+
+#### 9. 协程
+lua的function无法直接传入Unity的协程执行，需要使用xlua提供的工具`util`转换          
+
+
+前置准备：
+
+        --记录GameObject
+        GameObject =CS.UnityEngine.GameObject
+        --Unity的yield类
+        WaitForSeconds=CS.UnityEngine.WaitForSeconds
+        --xlua提供给的工具表
+        util=require("xlua.util")
+
+        --创建一个物体
+        local obj=GameObject("Coroutine")
+        --添加Mono脚本
+        local mono=obj:AddComponent(typeof(CS.LuaCallCSharp))
+
+
+声明协程方法：
+
+        fun=function()
+                local i=1
+                while i<11 do
+                        --yield返回Unity的类WaitForSeconds
+                        coroutine.yield(WaitForSeconds(1))
+                        print(i)
+                        i=i+1
+                        if i>3 then
+                                --停止本协程
+                                mono:StopCoroutine(co)
+                        end
+                end
+        end
 
 
 
+调用协程：      
+执行Unity协程方法时，需要使用`util`的方法`cs_generator`转换fun
 
+        co =mono:StartCoroutine(util.cs_generator(fun))
+
+
+#### 10. 泛型函数
+
+默认情况下lua仅支持调用C#`有参有约束的函数`，且约束只能是`Class`           
+
+调用:   
+
+        --有约束有参，直接传入参数
+        obj:TestFun1(child,father)
+        obj:TestFun1(father,child)
+
+当需要使用其他情况的泛型时，需要在新版xlua下使用                        
+xlua.get_generic_method(目标类,泛型方法名称)            
+
+        --记录泛型方法
+        local testFun2 =xlua.get_generic_method(Lesson,"TestFun2")
+        --设置泛型类型
+        local testFun2_int =testFun2(CS.System.Int32)
+
+        --成员方法第一个参数传对象，静态方法不用传
+        --执行泛型方法
+        testFun2_int(obj,3)
+
+>需要注意这种方法在Mono打包时，可以正常使用。             
+Il2cpp时，要考虑泛型是否被剔除的问题，引用类型正常使用，值类型需要C#调用过同类型的泛型参数，lua才能使用，不然就会被il2cpp自动剔除，导致lua无法访问
+
+此处需要复习il2cpp打包的知识，自动剔除的知识有些模糊            
+[C#补充课程-IL2Cpp问题处理](https://www.taikr.com/course/1374/task/48323/show)
 
 
 ## 4. Hotfix
 
+适用于已有的完全C#项目进行lua热补丁             
+可以使用lua逻辑顶替以往的C#逻辑         
+[xlua热补丁操作指南](https://github.com/Tencent/xLua/blob/master/Assets/XLua/Doc/hotfix.md)
+### 4.1 准备工作         
+
+1. Tools工具文件夹      
+路径:           
+`xLua-master`==>`Tools`         
+复制到Unity项目父文件夹下即可:           
+`xxProject/Tools  `
+
+2. 加入热修复宏         
+路径：                  
+`File`==>`Build Settings`==>`Project Settings`==>`Player`==>`Other Settings`==>`Scripting Define Symbols`               
+添加 `HOTFIX_ENABLE` 并应用             
+**官方提示** ：          
+建议平时开发业务代码不打开`HOTFIX_ENABLE`                  
+编辑器、各手机平台这个宏要分别设置！                      
+自动化打包在代码用API设置宏不生效，需要在编辑器设置。
+
+
+### 4.2 第一个热补丁     
+
+1. 特性                 
+C#被热修复的脚本需要添加 `[Hotfix]` 特性
+
+
+2. 编写lua热补丁代码   
+热补丁固定写法`xlua.hotfix(被补丁类，被补丁函数名，lua补丁函数)`      
+成员方法要增加`self`入参，静态方法不需要      
+示例：
+
+        --声明补丁方法
+        hf_GetAge=function (self)
+                return self.age
+        end
+        --注册补丁
+        xlua.hotfix(CS.HotfixTest,"GetAge",hf_GetAge)
+
+3. 生成代码           
+`Xlua`==>`GenerateCode`         
+每当新 **添加** 修复类或者方法时，都需要 **重新生成代码** 
+
+
+4. Hotfix注入           
+路径:           
+`Xlua`==>`Hotfix Inject In Editor`              
+注入时如果提示没有`Tools`那就是忘记做`4.1准备工作的1.Tools工具文件夹`步骤或者文件路径放错了。           
+每当被修复类内容 **修改** 时，都需要 **重新注入** 
+
+
+### 4.3 多函数替换
+多个函数一起替换时，调用:               
+ `xlua.hotfix(被修复类,{被替换方法1=lua方法1，被替换方法2=lua方法2} `            
+代码示例：              
+
+        xlua.hotfix(CS.HotfixTest2,{
+
+                --构造函数热补丁，固定写法 [".ctor"]
+                [".ctor"]=function ()
+                        print("热补丁后的构造函数")
+                end,
+                Speak=function(self,a)
+                        print("热补丁后的Speak："..a)
+                end,
+                --析构函数固定写法 Finalize
+                Finalize=function ()
+                        -- body
+                end
+        })
+以上，构造函数固定写法`[".ctor"]`，构析函数固定写法`Finalize`。          
+构造、构析两个函数的热补丁只能在原有逻辑之后执行，不能替换原有逻辑，                    
+其他函数都是替换原有逻辑                         
+
+
+
+### 4.4 协程函数替换
+
+1. 引用xlua 的转换工具类        
+用来转换lua协程给C#
+
+        util=require("xlua.util")
+
+
+
+2. 定义补丁协程函数             
+此函数的逻辑替换原有协程的逻辑
+
+        hf_Coroutine=function ()
+			while true do
+				coroutine.yield(CS.UnityEngine.WaitForSeconds(1))
+				print("lua补丁后的协程打印")
+			end
+        end
+
+3.  定义协程转换函数    
+通过util转换lua函数返回给C#
+
+        hf_TransformCo=function (self)          
+			--返回一个xlua处理过的lua协程函数
+		        return util.cs_generator(hf_Coroutine)
+        end
+
+
+4. 替换协程函数         
+将`3`的转换函数替换原有的协程
+
+        xlua.hotfix(CS.HotfixMain,{
+                TestCoroutine=hf_TransformCo
+        })
+
+>实际也可以将以上三个函数嵌套一起写
+
 
 ## 5. xLua的背包系统
+
+### 1. 准备工作
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
