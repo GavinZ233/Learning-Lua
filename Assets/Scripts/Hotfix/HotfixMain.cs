@@ -1,13 +1,54 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using XLua;
 
 [Hotfix]
 public class HotfixMain : MonoBehaviour
 {
     HotfixTest2 hotfixTest2;
-    // Start is called before the first frame update
+
+    public int[] array=new int[] { 1, 2, 3 };
+    public int Age
+    {
+        get
+        {
+            return 0;
+        }
+        set
+        {
+            Debug.Log(value);
+        }
+    }
+
+    public int this[int index]
+    {
+        get
+        {
+            if (index < 0||index>=array.Length)
+            {
+                Debug.LogWarning("索引不正确");
+                return 0;
+            }
+            return array[index];
+        }
+        set
+        {
+            if (index < 0 || index >= array.Length)
+            {
+                Debug.LogWarning("索引不正确");
+                return;
+            }
+             array[index]= value;
+
+        }
+    }
+
+
+    event UnityAction myEvent;
+
     void Start()
     {
         LuaMgr.GetInstance().Init();
@@ -22,10 +63,31 @@ public class HotfixMain : MonoBehaviour
         //HotfixTest1 hotfixTest1 = new HotfixTest1();
         //print(hotfixTest1.GetAge());
 
-        hotfixTest2 =new HotfixTest2();
-        hotfixTest2.Speak("Start");
+        //hotfixTest2 =new HotfixTest2();
+        //hotfixTest2.Speak("Start");
 
-        StartCoroutine(TestCoroutine());
+        //StartCoroutine(TestCoroutine());
+
+
+        this.Age= 10;
+        Debug.Log(this.Age);
+
+        this[0] = 100;
+        Debug.Log(this[0]);
+
+        myEvent += TestEvent;
+        myEvent -= TestEvent;
+
+        HotfixGenericity<string> t1=new HotfixGenericity<string>();
+        t1.Test("321");
+
+        HotfixGenericity<int> t2=new HotfixGenericity<int>();
+        t2.Test(123);
+    }
+
+    private void TestEvent()
+    {
+
     }
 
     // Update is called once per frame
@@ -89,4 +151,12 @@ public class HotfixTest2
 
     ~HotfixTest2 () { }
 
+}
+[Hotfix]
+public class HotfixGenericity<T>
+{
+    public void Test(T t)
+    {
+        Debug.Log(t);
+    }
 }

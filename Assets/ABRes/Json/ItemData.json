@@ -1,0 +1,8 @@
+[
+{"id":1,"name":"弓箭","icon":"Icon_2","type":1,"tips":"远程武器"},
+{"id":2,"name":"拳套","icon":"Icon_1","type":1,"tips":"近战武器"},
+{"id":3,"name":"疗伤药水","icon":"Icon_4","type":2,"tips":"恢复生命值"},
+{"id":4,"name":"冥想药水","icon":"Icon_3","type":2,"tips":"恢复法力值"},
+{"id":5,"name":"红宝石","icon":"Icon_5","type":3,"tips":"可合成物理系高阶材料"},
+{"id":6,"name":"蓝宝石","icon":"Icon_6","type":3,"tips":"可合成魔法系高阶材料"}
+]

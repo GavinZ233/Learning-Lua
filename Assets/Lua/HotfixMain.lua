@@ -12,7 +12,7 @@ end
 
 
 
-require("Hotfix_Lesson3")
+require("Hotfix_Lesson6")
 
 
 

@@ -666,7 +666,7 @@ call方法就是给予了该表一个可以调用自己执行的方法，call �
 
 自己简言之：            
 当子表找不到某属性时，会到元表的__index指定的表找索引，利用index可以向上嵌套，类似于多重继承的效果。        
-当赋值时，默认属于index，声明了newindex时，默认属于newindex，再访问这些就需要注明newindex
+当赋值时，默认属于index，声明了newindex时，默认属于newindex，再访问这些就需要注明newindex，否则在index找不到newindex的变量。
 
 #### 5. rawget rawset           
 rawget会忽略index，在自身寻找变量       
@@ -1643,7 +1643,7 @@ Il2cpp时，要考虑泛型是否被剔除的问题，引用类型正常使用�
 `File`==>`Build Settings`==>`Project Settings`==>`Player`==>`Other Settings`==>`Scripting Define Symbols`               
 添加 `HOTFIX_ENABLE` 并应用             
 **官方提示** ：          
-建议平时开发业务代码不打开`HOTFIX_ENABLE`                  
+建议平时开发业务代码不打开HOTFIX_ENABLE                  
 编辑器、各手机平台这个宏要分别设置！                      
 自动化打包在代码用API设置宏不生效，需要在编辑器设置。
 
@@ -1738,13 +1738,283 @@ C#被热修复的脚本需要添加 `[Hotfix]` 特性
                 TestCoroutine=hf_TransformCo
         })
 
->实际也可以将以上三个函数嵌套一起写
+>实际也可以将以上三个函数嵌套在一起写，不过有些混乱。            
+建议将转换函数与补丁函数合并，写成下面样子:
+
+        hf_Coroutine=function (self)          
+                --返回一个xlua处理过的lua协程函数
+                --此匿名函数用来顶替原有C#协程
+                return util.cs_generator(function()
+                        while true do
+                                coroutine.yield(CS.UnityEngine.WaitForSeconds(1))
+                                print("lua补丁后的协程打印")
+                        end
+                end)
+        end
+
+
+        xlua.hotfix(CS.HotfixMain,{
+                TestCoroutine=hf_Coroutine
+        })
+
+### 4.5 访问器索引器替换
+本章节在原有的知识基础上，只需要注意名称。                
+访问器set方法`set_属性名`，get方法`get_属性名`             
+索引器set方法`set_Item`，get方法`get_Item`              
+并且都是`成员方法`，记得加入参数`self`
+#### 1. 访问器替换
+
+原有C#访问器:           
+
+    public int Age
+    {
+        get
+        {return 0;}
+        set
+        {Debug.Log(value);}
+    }
+
+lua补丁访问器:
+
+	--set_属性名  set方法
+	--get_属性名  get方法
+	set_Age=function (self,v)
+		print("lua重定向的set")
+	end,
+	get_Age=function (self,v)
+		return 99
+	end,
+
+
+
+#### 2. 索引器替换
+
+
+原有C#索引器:           
+
+    public int this[int index]
+    {
+        get
+        {
+            if (index < 0||index>=array.Length)
+            {
+                Debug.LogWarning("索引不正确");
+                return 0;
+            }
+            return array[index];
+        }
+        set
+        {
+            if (index < 0 || index >= array.Length)
+            {
+                Debug.LogWarning("索引不正确");
+                return;
+            }
+             array[index]= value;
+
+        }
+    }
+
+
+
+
+lua补丁索引器:
+
+	--set_Item  索引器设置
+	--get_Item  索引器获取
+	set_Item=function (self,index,v)
+		print("lua重定向set"..index.."值："..v)
+	end,
+	get_Item=function (self,index)
+		return 99
+	end
+
+
+
+### 4.6 事件加减
+使用场景较少           
+
+添加方法`add_事件名称`             
+移除方法`remove_事件名称`
+
+需要注意：添加方法被重定向后，就无法正常添加了，不能继续调用C#的添加方法，会造成死循环，一般是将函数存在lua中
+
+lua补丁代码:
+
+        add_myEvent=function (self,del)
+                print(del)
+                print("添加事件函数")
+        end,
+        remove_myEvent=function (self,del)
+                print(del)
+                print("移除事件函数")
+        end
+
+
+### 4.7 泛型类替换
+
+泛型类T是不确定的，lua中要将每个类型都替换
+
+        xlua.hotfix(CS.HotfixGenericity(CS.System.String),{
+                Test=function (self,t)
+                        print("lua补丁打印："..t)
+                end
+        })
+
+        xlua.hotfix(CS.HotfixGenericity(CS.System.Int32),{
+                Test=function (self,t)
+                        print("lua补丁打印："..t)
+                end
+        })
+
+
+
+
+
+
+
 
 
 ## 5. xLua的背包系统
 
 ### 1. 准备工作
 
+#### 1. Asset Bundle Browser                 
+2020版本以下直接在UnityPackageMgr搜索，                 
+2020版本以上打开UnityPackageMgr，点+号选择URL导入： `https://github.com/Unity-Technologies/AssetBundles-Browser.git`
+
+#### 2. xlua         
+以下文件夹复制到项目根目录      
+`Plugins`,`Xlua`
+
+#### 3. C#基础代码（非必须）                 
+单例基类，AB包管理器，Lua解析器管理器
+
+
+#### 4. lua基础代码（非必须）                        
+lua面向对象逻辑，lua json工具脚本，字符串拆分脚本
+
+
+#### 5. C#主脚本             
+挂载在场景上，负责调用lua主脚本即可
+
+传送到地方
+
+#### 6. VSCode插件     
+1. 美化     
+Material Icon Theme                    
+Guides          
+background
+
+
+    "background.fullscreen": {
+
+        "images": ["https://file.moyublog.com/d/file/2022-10-10/06eb592b69286f9dc9cbb50d3c320357.jpg"],
+        "opacity": 0.85,
+        "size": "cover",
+        "position": "center",
+        "interval": 0
+    }
+
+
+2. 功能                 
+Chinese         
+C#              
+C# XML Documentation Comments  `///`快速注释               
+Unity Snippets          
+Auto-Using for C#               
+Debugger for Unity（已经弃用改用Unity）                
+
+
+3. Unity调试配置                     
+`Debugger for Unity`已经被弃用，导致只能用`Unity`，且只支持2019以上版本Unity。                  
+如果依然选择老版本Unity可能需要参考该方法，自己没尝试                   
+[VS Code里使用Debugger for Unity插件进行调试(2023最新版)](https://blog.csdn.net/nick1992111/article/details/128580845)                 
+新版本也需要进入`Package Manager`升级`Visual Studio Editor`到最新版，然后去首选项选择VSCode。             
+Unity调试前需要创建配置文件`launch.json`，在文件内添加:
+
+
+        {
+            "name": "Unity调试",
+            "type": "vstuc",
+            "request": "attach"
+        }
+
+
+1. Lua调试配置                  
+vscode插件`EmmyLua`，作用是调试lua，但需要java的jdk。                     
+课程中的jdk是`jdk-1.8-64`版本。                 
+然后配置java环境：                      
+进入系统属性，环境变量                
+系统变量添加                
+变量名：JAVA_HOME                
+变量值：`C:\Program Files\Java\jdk1.8.0_191`           
+变量名：CLASSPATH                
+变量值：`.;%Java_Home%\bin;%Java_Home%\lib\dt.jar;%Java_Home%\lib\tools.jar`           
+环境变量的Path新建`%JAVA_HOME%\bin`         
+最后在配置文件`launch.json`添加:              
+
+        {
+            "type": "emmylua_attach",
+            "request": "attach",
+            "name": "Lua附加Unity",
+            "pid": 0,
+            "processName": ""
+        }
+
+
+
+### 2.UI准备            
+拼UI太基础，就不做操作记录了。                        
+1. 主面板               
+拼接出一个主面板`MainPanel`             
+有两个按钮`btnSkill` `btnRole`           
+
+1. 背包面板             
+背包面板`BagPanel`              
+内容：背景图`bg`，关闭按钮`btnClose`，                  
+Toggle组`toggleGroup`，包含：`togEquip` `togItem` `togGem`                
+还有一个物品的scrollview，记得在content上加`GridLayoutGroup`和`ContentSizeFitter`
+
+1. 物品格子     
+物品格子`ItemGrid`              
+自上向下：图片`bg`物品图标`icon`数量文本`num`
+
+
+
+### 3. lua基础类                
+
+1. 面向对象的模拟类     
+
+2. 字符串根据分隔符拆分的脚本
+   
+3. JsonUtility.lua
+
+4. 初始化脚本                   
+   负责调用以上三个脚本，和提前记录所有常用的C#类 
+
+### 4. 数据准备
+
+#### 1. 编写一些json数据，提供给背包item             
+
+#### 2. 将icon打包成图集
+
+#### 3. 将预制体、json、图集打AB包                   
+打AB如果报lua相关的错，记得先清空xlua代码再打包
+
+#### 4. lua读json
+
+首先构建了两个脚本：            
+1. ItemData             
+   调用`ABMgr`加载json的AB包得到`TextAsset`，再通过lua这边预先调用的`JsonUtility`decode成表，           
+   将表的内容按照`id：item信息表`的格式存在全局表`ItemData`中           
+2. PlayerData           
+   玩家信息表`PlayerData`，内部存储三个小表：`equips` `items` `gems`，每个表都记录相关的id与数量。            
+   初始化方法`Init`用来获取玩家数据信息,将信息填入到玩家信息表中，目前数据是在方法里直接写死的，后面可以换成从外部读取。                
+
+
+
+### 5. 主面板逻辑
 
 
 
