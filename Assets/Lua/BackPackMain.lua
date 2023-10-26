@@ -7,6 +7,8 @@ require("ItemData")
 require("PlayerData")
 PlayerData:Init()
 
-
-
+require("MainPanel")
+require("BagPanel")
+--MainPanel:Init()
+MainPanel:ShowMe()
 

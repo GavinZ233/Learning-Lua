@@ -28,7 +28,8 @@ ScrollRect=UI.ScrollRect
 --自己的C#脚本      
 ABMgr=CS.ABMgr.Instance
 
-
+--仅适用当前demo,Canvas记录场景中Canvas的transform
+Canvas=GameObject.Find("Canvas").transform
 
 
 

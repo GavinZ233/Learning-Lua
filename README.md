@@ -1552,7 +1552,8 @@ lua无法直接使用系统类型float，int等，提示需要添加call的特�
                 };
         }
 
-
+xlua参考文档:                   
+[xLua的配置](https://github.com/Tencent/xLua/blob/master/Assets/XLua/Doc/configure.md)
 #### 9. 协程
 lua的function无法直接传入Unity的协程执行，需要使用xlua提供的工具`util`转换          
 
@@ -2014,8 +2015,73 @@ Toggle组`toggleGroup`，包含：`togEquip` `togItem` `togGem`
 
 
 
-### 5. 主面板逻辑
+### 5. 主面板MainPanel
 
+|名称|类型|作用|
+|--|--|--|
+|MainPanel|表|当作本面板的类，记录面板与按钮
+|panelObj|表|记录本面板GameObject
+|btnRole|表|记录角色面板按钮
+|btnSkill|表|记录技能面板按钮
+|MainPanel:Init|方法|初始化面板，实例化面板与按钮，并传入点击事件
+|MainPanel:ShowMe|方法|初始化面板，显示面板
+|MainPanel:HideM|方法|隐藏面板
+|MainPanel:BtnRoleClic|方法|点击事件
+|MainPanel:BtnSkillClick|方法|点击事件
+
+
+**注意:**                   
+在调用按钮的`onClick:AddListener()`时，传入的是方法，只能如下：     
+
+        self.btnRole.onClick:AddListener(self.BtnRoleClick)
+
+此时面对一个问题：方法`BtnRoleClick`内部没有传入`self`，也即在外部调用时，访问不到主面板的成员。            
+保持该思路，就需要在方法`BtnRoleClick`内部修改:                 
+
+        function  MainPanel:BtnRoleClick()
+                print(MainPanel.panelObj)
+        end
+
+这样可以通过全局变量`MainPanel`访问主面板的成员，但有些绕圈子，也违背了面向对象的思想。      
+
+**解决方法：**                 
+可以在调用按钮的`onClick:AddListener()`时，将传入的方法套在匿名函数内，保持方法可以传入`self`。                 
+
+    self.btnRole.onClick:AddListener(function ()
+        self:BtnRoleClick()
+    end)
+
+
+### 6. 背包面板BagPanel
+
+|名称|类型|作用|
+|--|--|--|
+|BagPanel|表|当作本面板的类，记录面板与按钮
+|panelObj|表|记录本面板GameObject
+|btnClose|表|记录关闭按钮
+|togEquip|表|记录装备复选框
+|togItem|表|记录物品复选框
+|togGem|表|记录宝石复选框
+|svBag|表|记录滚动框
+|Content|表|记录物品容器Transform
+|BagPanel:Init|方法|初始化面板，实例化面板与按钮，并传入点击事件
+|BagPanel:ShowMe|方法|初始化面板，显示面板
+|BagPanel:HideM|方法|隐藏面板
+|BagPanel:ChangeType(type)|方法|根据点击的复选框切换下方滚动框内容
+
+
+**注意:**   
+
+此处的Toggle事件`onValueChanged:AddListener(value)`有参数，需要标注`[CSharpCallLua]`特性，但碍于无法添加，使用一个静态类创建静态列表记录类型，帮助xlua生成对应的解释代码         
+
+        public static class CSharpCallLuaList
+        {
+                [CSharpCallLua]
+                public static List<Type> cSharpCallLuaList=new List<Type>()
+                { 
+                        typeof(UnityAction<bool>)
+                };
+        }
 
 
 
