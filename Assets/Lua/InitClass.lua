@@ -13,7 +13,7 @@ RectTransform=CS.UnityEngine.RectTransform
 Vector3=CS.UnityEngine.Vector3
 Vector2=CS.UnityEngine.Vector2
 
-SpriteAtlas=CS.UnityEngine.SpriteAtlas
+SpriteAtlas=CS.UnityEngine.U2D.SpriteAtlas
 TextAsset=CS.UnityEngine.TextAsset
 
 --UI相关
@@ -23,7 +23,8 @@ Text=UI.Text
 Button=UI.Button
 Toggle=UI.Toggle
 ScrollRect=UI.ScrollRect
-
+GridLayoutGroup=UI.GridLayoutGroup
+ContentSizeFitter=UI.ContentSizeFitter
 
 --自己的C#脚本      
 ABMgr=CS.ABMgr.Instance
