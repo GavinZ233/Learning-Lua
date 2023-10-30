@@ -12,6 +12,7 @@ BagPanel.Content=nil
 --用来存储当前显示的格子
 BagPanel.items={}
 
+BagPanel.nowType=-1
 
 function BagPanel:Init()
     self.panelObj=ABMgr:LoadRes("ui","BagPanel",typeof(GameObject))
@@ -59,6 +60,9 @@ end
 function BagPanel:ShowMe()
     self:Init()
     self.panelObj:SetActive(true)
+    if self.nowType==-1 then
+        self:ChangeType(1)
+    end
 end
 
 function BagPanel:HideMe()
@@ -70,11 +74,16 @@ end
 --type：1装备，2物品，3宝石
 function BagPanel:ChangeType(type)
     print("类型切换为:"..type)
+    --判断是否需要切页
+    if self.nowType==type then
+        return
+    end
 
     --更新前，删掉老的格子items
     for i=1 ,#self.items do
-        GameObject.Destroy(self.items[i].obj)
+        self.items[i]:Destroy()
     end
+    self.items={}
     --要根据传入的type来选择显示的数据
 
     --先记录当前要显示的信息表
@@ -88,31 +97,12 @@ function BagPanel:ChangeType(type)
     end
 
     for i=1 ,#nowItems do
-        --物品栏格子表
-        local grid={}
-        --用一张新表代表格子对象里的属性，存储对应想要的信息
-        grid.obj=ABMgr:LoadRes("ui","ItemGrid",typeof(GameObject));
-        --设置父对象
-        grid.obj.transform:SetParent(self.Content,false)
-        --设置位置
-        grid.obj.transform.localPosition=Vector3((i-1)%4*114,math.floor((i-1)/4)*114,0)
-        --找到控件
-        grid.icon=grid.obj.transform:Find("icon"):GetComponent(typeof(Image))
-        grid.num=grid.obj.transform:Find("num"):GetComponent(typeof(Text))
-
-        --设置图标
-        --用id从表中找到对应的物品信息
-        local data=ItemData[nowItems[i].id]
-        --从物品信息中找到icon名称，并使用`——`分割成多个字符串
-        local strs=string.split(data.icon,"_")
-        --加载图集
-        local spriteAtlas=ABMgr:LoadRes("ui",strs[1],typeof(SpriteAtlas))
-        --加载图标
-        grid.icon.sprite=spriteAtlas:GetSprite(strs[2])
-
-        --设置数量
-        grid.num.text=nowItems[i].num
-
+        
+        --根据数据创建格子，实例化对象
+        local grid=ItemGrid:new()
+        grid:Init(self.Content,(i-1)%4*114,math.floor((i-1)/4)*114)
+        --初始化信息
+        grid:InitData(nowItems[i])
         --存放格子
         table.insert(self.items,grid)
     end

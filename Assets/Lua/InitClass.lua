@@ -25,7 +25,7 @@ Toggle=UI.Toggle
 ScrollRect=UI.ScrollRect
 GridLayoutGroup=UI.GridLayoutGroup
 ContentSizeFitter=UI.ContentSizeFitter
-
+UIBehaviour=CS.UnityEngine.EventSystems.UIbehaviour
 --自己的C#脚本      
 ABMgr=CS.ABMgr.Instance
 

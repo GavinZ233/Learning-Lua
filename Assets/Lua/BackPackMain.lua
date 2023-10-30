@@ -9,6 +9,7 @@ PlayerData:Init()
 
 require("MainPanel")
 require("BagPanel")
+require("ItemGrid")
 --MainPanel:Init()
 MainPanel:ShowMe()
 

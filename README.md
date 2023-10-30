@@ -38,7 +38,7 @@ lua课程学习笔记
 |**Build Target**|打包的目标平台|
 |**Ouput Path**|ab包输出路径|
 |**Clear Folders**|打包前清空路径，可以清除一些不需要的包|
-|**Copy to StreamingAssets**|输出的ab包复制给SA一份|
+|**Copy to StreamingAssets**|输出的ab包复制到StreamingAssets一份|
 |**Compression**|压缩方式：1.不压缩 2.LZMA压缩最小，但解压时全部解压 3. `LZ4`压缩包体比LAZMA略大，但可以单独解压
 |Exclude Type Information|在资源包中不包含资源的类型信息|
 |Force Rebuild|重新打包时重新构建所有包，不会删除多余的包|
@@ -2084,11 +2084,28 @@ Toggle组`toggleGroup`，包含：`togEquip` `togItem` `togGem`
         }
 
 
+### 7. 物品格子ItemGrid
+
+依靠已有的面向对象模拟脚本，实现一个`ItemGrid`类                
+
+        Object:subClass("ItemGrid")
+
+
+|名称|类型|作用|
+|--|--|--|
+|ItemGrid.obj|表|记录场景中的物品格子
+|ItemGrid.icon|表|记录格子的图标
+|ItemGrid.num|表|记录格子的数量文本
+|ItemGrid:Init(father,posX,posY)|方法|实例化物品格子，记录控件，设置父物体与位置
+|ItemGrid:InitData(data)|方法|读取数据，更新格子的图标与数量
+|ItemGrid:Destroy()|方法|删除对应的物品格子，并置空引用
+
+
+>此背包只是跟随唐老师的思路制作，后续自行制作时应该注意：其中的数据名称命名方式可以写得详细一些，避免认知混乱，预制体也可以更加丰富，满足多种定制化，比如背景图和环绕特效等。             
 
 
 
-
-
+### 8. 面板基类
 
 
 
