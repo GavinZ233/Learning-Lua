@@ -1,0 +1,46 @@
+ManifestFileVersion: 0
+CRC: 3105527903
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 922f6e1937dfcab9698a373ce59f03fd
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/LuaTxt/Hotfix_Lesson5.lua.txt
+- Assets/LuaTxt/Lesson7_CallDel.lua.txt
+- Assets/LuaTxt/Lesson8_Special.lua.txt
+- Assets/LuaTxt/Test.lua.txt
+- Assets/LuaTxt/BasePanel.lua.txt
+- Assets/LuaTxt/LuaMain.lua.txt
+- Assets/LuaTxt/HotfixMain.lua.txt
+- Assets/LuaTxt/Lesson10_Generic.lua.txt
+- Assets/LuaTxt/Lesson1_CallClass.lua.txt
+- Assets/LuaTxt/Hotfix_Lesson4.lua.txt
+- Assets/LuaTxt/Object.lua.txt
+- Assets/LuaTxt/Hotfix_Lesson2.lua.txt
+- Assets/LuaTxt/Hotfix_Lesson6.lua.txt
+- Assets/LuaTxt/ItemData.lua.txt
+- Assets/LuaTxt/PlayerData.lua.txt
+- Assets/LuaTxt/InitClass.lua.txt
+- Assets/LuaTxt/Hotfix_Lesson1.lua.txt
+- Assets/LuaTxt/Lesson6_CallOverFunction.lua.txt
+- Assets/LuaTxt/Lesson9_Coroutine.lua.txt
+- Assets/LuaTxt/Lesson4_CallFunction.lua.txt
+- Assets/LuaTxt/BackPackMain.lua.txt
+- Assets/LuaTxt/MainPanel.lua.txt
+- Assets/LuaTxt/BagPanel.lua.txt
+- Assets/LuaTxt/Hotfix_Lesson3.lua.txt
+- Assets/LuaTxt/Lesson2_CallEnum.lua.txt
+- Assets/LuaTxt/Lesson3_CallArray.lua.txt
+- Assets/LuaTxt/SplitTools.lua.txt
+- Assets/LuaTxt/ItemGrid.lua.txt
+- Assets/LuaTxt/JsonUtility.lua.txt
+- Assets/LuaTxt/Lesson5_CallRefOut.lua.txt
+Dependencies: []

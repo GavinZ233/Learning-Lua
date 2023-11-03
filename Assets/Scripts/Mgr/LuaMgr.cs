@@ -32,7 +32,7 @@ public class LuaMgr : BaseManager<LuaMgr>
         //初始化解析器
         luaEnv = new LuaEnv();
         //Lua脚本重定向
-        luaEnv.AddLoader(CustomLoader);
+        //luaEnv.AddLoader(CustomLoader);
         luaEnv.AddLoader(CustomABLoader);
 
     }

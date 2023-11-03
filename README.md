@@ -2107,8 +2107,138 @@ Toggle组`toggleGroup`，包含：`togEquip` `togItem` `togGem`
 
 ### 8. 面板基类
 
+|名称|类型|作用|
+|--|--|--|
+|BasePanel.panelObj|表|记录面板对象
+|BasePanel.controls|表|记录所有控件的键值对表
+|BasePanel.isInitEvent|Boolean|监听事件是否写入的标记，防止多次写入
+|BasePanel:Init(name)|方法|初始化，从AB包读取目标面板挂载Canvas下，Get所有UIBehaviour，得到该面板下所有子物体的UI类并记录到字典
+|BasePanel:GetControl(name,typeName)|方法|从控件表中找到该控件并返回
+|BasePanel:ShowMe()|方法|显示面板物体
+|BasePanel:HideMe()|方法|隐藏面板物体
+
+>其中初始化方法中，控件表只记录需要的控件，如：toggle，button等，这些控件在Unity中的命名按照"togRole,btnRole"的统一规则，在遍历时只需要辨认该控件的名称中是否包含所需要的关键字，即可排除掉无关的UI组件。               
+记录时，按照[控件名称]:[UI组件1，UI组件2]的形式记录所有需要记录的Component。            
+
+
+
+### 9. 拓展工具
+
+该脚本继承`Editor`，本篇属于编辑器拓展的知识。          
+#### 1. 拓展方法的声明
+方法需要为`static`静态方法，毕竟拓展脚本一般不会进行实例化，静态很好理解。                
+方法需要加特性  `[MenuItem("一级菜单/当前功能的按钮名称")]` ，加上特性后可以在Unity左上角的按钮中找到该方法。           
+
+顺便一提：在右键菜单栏创建目标资源的特性如下            
+[CreateAssetMenu(fileName ="文件名称",menuName ="一级菜单/文件名称")]
+
+#### 2. Directory文件操作
+1. 检验路径是否有效
+
+        boolean hasPath =Directory.Exists(path)
+
+2. 获取搜索文件的路径           
+其中`GetFiles(搜索的路径，要搜索的文件名信息)`，`*`占位符可以忽略文件名称，直接比较文件后缀名。
+
+        string[] paths=Directory.GetFiles(path,"*.lua");
+
+3. 创建路径
+
+        Directory.CreateDirectory(newPath);
+
+#### 3. File操作
+
+1. 文件删除
+
+        File.Delete(要删除的文件路径);
+
+2. 文件copy
+
+        File.Copy(来源路径,copy路径);
+
+#### 4. Unity操作
+
+1. 刷新资源             
+如果不刷新，无法修改刚生成的资源
+
+        AssetDatabase.Refresh();
+      
+2. 修改AB包归属                 
+此处的`importerPath`是相对于`Assets`的，如：Assets/LuaTxt/Main.lua.txt                  
+此操作为创建一个记录AB包的资源导入器类，在 importerPath 处检索资源的资源导入器，并为该资源选择AB包
+
+        AssetImporter importer=AssetImporter.GetAtPath(importerPath);
+        importer.assetBundleName="lua";
+
+#### 5. 拓展知识
+
+##### 5.1 Directory
+
+
+##### 5.2 File
+
+
+
+##### 5.3 AssetDatabase
+
+
+
+
+##### 5.4 AssetImporter
 
 
 
 
 
+#### 6. 代码
+
+
+        public class LuaCopyEditor:Editor  
+        {
+                [MenuItem("XLua/lua文件加txt")]
+                public static void CopyLuaToTxt(){
+                        //找到所有Lua文件
+                        string path=Application.dataPath+"/Lua/";
+                        if(!Directory.Exists(path)) 
+                                return;
+
+                        //得到每一个lua文件的路径才能迁移拷贝
+                        string[] strs=Directory.GetFiles(path,"*.lua");
+
+                        //文件拷贝到新文件夹
+                        string newPath=Application.dataPath+"/LuaTxt/";
+
+                        //判断新路径文件夹是否存在
+                        if(!Directory.Exists(newPath))
+                                Directory.CreateDirectory(newPath);
+                        else
+                        {
+                                //得到该路径所有txt文件，删除
+                                string[] oldFileStrs=Directory.GetFiles(newPath,"*.txt");
+                                for (int i = 0; i < oldFileStrs.Length; i++)
+                                {
+                                        File.Delete(oldFileStrs[i]);
+                                }
+                        }
+                        string fileName;//要保存的新路径名
+                        List<string> newFileNames=new List<string>();
+                        for (int i = 0; i < strs.Length; i++)
+                        {
+                                fileName=newPath+strs[i].Substring(strs[i].LastIndexOf("/")+1)+".txt";
+                                File.Copy(strs[i],fileName);
+                                newFileNames.Add(fileName);
+                        }
+                        AssetDatabase.Refresh();
+                        //如果不刷新，无法修改刚生成的资源
+
+                        for (int i = 0; i < newFileNames.Count; i++)
+                        {
+                                //传入路径是相对Assets的 
+                                string importerPath=newFileNames[i].Substring(newFileNames[i].IndexOf("Assets"));
+                                Debug.Log("AssetImporter"+importerPath);
+                                AssetImporter importer=AssetImporter.GetAtPath(importerPath);
+                                if(importer!=null)
+                                importer.assetBundleName="lua";
+                        }
+                }
+        }
