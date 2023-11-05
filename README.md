@@ -2171,26 +2171,141 @@ Toggle组`toggleGroup`，包含：`togEquip` `togItem` `togGem`
         importer.assetBundleName="lua";
 
 #### 5. 拓展知识
+仅记录以下类的常用方法 
 
 ##### 5.1 Directory
+命名空间：System.IO             
+         
+1. 检查路径             
+
+        bool hasPath =Directory.Exists(path)
+
+2. 创建路径
+   
+        Directory.CreateDirectory(path)
+   
+3. 删除路径   
+值得注意的：使用本方法删除路径和子文件时，需要额外操作删除该文件夹的meta文件，否则Unity会报警   
+
+        从指定路径删除空目录
+        Directory.Delete(path)
+        删除指定的目录，并删除该目录中的所有子目录和文件
+        Directory.Delete(path, true)
+
+
+4. 查找路径             
+其中的通配符作用 `*`：代替0个或多个字符 `?`:代替该位置的一个字符   
+
+        string[] allDirs = Directory.GetDirectories(path);
+        string[] searchDirs = Directory.GetDirectories(path, "201?");
+
+5. 查找文件             
+
+        string[] allFilePath = Directory.GetFiles(path);
+        string[] searchFilePath = Directory.GetFiles(path, "*.txt");
+
+6. 查找路径下的所有文件和路径
+
+        string[] allPath =Directory.GetFileSystemEntries(path);
+        string[] searchPath =Directory.GetFileSystemEntries(path,"*.txt");
+
+7. 移动目录及子文件           
+
+        Directory.Move(sourceDirectory, destinationDirectory);
+
 
 
 ##### 5.2 File
 
 
 
+
+
+
+
+
 ##### 5.3 AssetDatabase
+Unity提供的API，提供了访问操作资源的方法                
+由于 Unity 需要跟踪项目文件夹的所有更改，因此如果要访问或修改资源数据，则应始终使用 AssetDatabase API 而不是文件系统。(因为直接使用File删除文件会导致原本的meta文件没有更新，Unity跟踪失败)          
+AssetDatabase 接口仅在编辑器中可用，并且在构建的播放器中没有任何函数。与所有其他编辑器类一样，它仅适用于放置在 Editor 文件夹中的脚本                    
+所有路径均是相对于项目文件夹的路径，例如："Assets/MyTextures/hello.png"         
+
+[AssetDatabase成员](https://docs.unity.cn/cn/2018.4/ScriptReference/AssetDatabase.html)        
+1. 查看
+   
+        //是否为Assets文件夹内的资源？
+        bool isAsset =AssetDatabase.Contains(obj);
+        //文件夹的路径是否存在
+        bool hasPath =AssetDatabase.IsValidFolder(path);
+        //是否为Project 窗口中的主资源，如模型资源的跟对象
+        bool isMainAsset=AssetDatabase.IsMainAsset(obj);
+
+        
+2. GUID相关             
+其中：`searchStr`可以是`名称的一部分` `标签` `类型` ,且搜索内容不分大小写             
+返回结果不限于资源也包含文件夹和脚本类
+
+
+        string[] results;
+        searchStr="Players";
+        results = AssetDatabase.FindAssets(searchStr);
+        //加入规定搜索范围的文件夹路径，不加入默认就是在Assets下搜索
+        results = AssetDatabase.FindAssets(searchStr，string[] searchInFolders);
+
+
+        
+3. 获取路径
+
+
+        string ret = AssetDatabase.CreateFolder("Assets", "NewFolder");
+        if(AssetDatabase.GUIDToAssetPath(ret) != "")
+            Debug.Log("Folder asset created");
+        else
+            Debug.Log("Couldn't find the GUID for the path");
+        
+4. 路径GUID转换
+
+
+        string ret = AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(material), "Assets/NewFolder/MyMaterialNew.mat");
+        if(ret == "")
+            Debug.Log("空字符串说明成功");
+        else
+            Debug.Log("返回错误内容："+ret);
+        
+5. 获取资源
+
+
+        if(AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(material), "Assets/MyMaterialNew.mat"))
+            Debug.Log("Material asset copied as Assets/MyMaterialNew.mat");
+        else
+            Debug.Log("Couldn't copy the material");
+6. 加载资源
+
+        Material Material1 = AssetDatabase.LoadAssetAtPath("Assets/MyMaterialNew.mat", typeof(Material)) as Material;
+        Material Material2 = AssetDatabase.LoadAssetAtPath<Material>(path);
+        Sprite[] objs = AssetDatabase.LoadAllAssetsAtPath("Assets/_ZH/AssetDatabaseAPI/test.png");
+
+7. 创建资源
+
+
+        if(AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(MaterialCopy)))
+            Debug.Log("MaterialCopy asset moved to trash");
+        
+8. 删除资源
+
+
+        if(AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(material)))
+            Debug.Log("Material asset deleted");
+        if(AssetDatabase.DeleteAsset("Assets/NewFolder"))
+            Debug.Log("NewFolder deleted");
+9. 复制移动
+
+
+        AssetDatabase.Refresh();
 
 
 
-
-##### 5.4 AssetImporter
-
-
-
-
-
-#### 6. 代码
+#### 6. 工具代码
 
 
         public class LuaCopyEditor:Editor  

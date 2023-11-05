@@ -29,6 +29,7 @@ public class LuaCopyEditor:Editor
             {
                 File.Delete(oldFileStrs[i]);
             }
+
         }
         string fileName;//要保存的新路径名
         List<string> newFileNames=new List<string>();
@@ -38,7 +39,7 @@ public class LuaCopyEditor:Editor
             File.Copy(strs[i],fileName);
             newFileNames.Add(fileName);
         }
-        AssetDatabase.Refresh();
+         AssetDatabase.Refresh();
         //如果不刷新，无法修改刚生成的资源
 
         for (int i = 0; i < newFileNames.Count; i++)
